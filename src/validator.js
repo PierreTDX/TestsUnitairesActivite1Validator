@@ -71,3 +71,22 @@ export function validateIdentity(name) {
     }
     return true;
 }
+
+/**
+ * Validate an email address.
+ *
+ * @param {string} email The email to check.
+ * @return {boolean} True if the email is valid.
+ */
+export function validateEmail(email) {
+    if (!email) {
+        throw new Error("missing param email")
+    }
+    if (typeof email !== 'string') {
+        throw new Error("email must be a string")
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new Error("email is invalid")
+    }
+    return true;
+}
