@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "doc": "jsdoc module/validator.js -d docs"
+    "test": "jest --coverage",
+    "jsdoc": "jsdoc -c ./jsdoc.config.json -r -d ./docs"
   },
   "keywords": [],
   "author": "",

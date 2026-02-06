@@ -34,7 +34,7 @@ export function calculateAge(p) {
     return age;
 }
 
-let loise = {
-    birth: new Date("11/07/1991")
-}
-console.log(calculateAge(loise))
+// let loise = {
+//     birth: new Date("05/13/2008")
+// }
+// console.log(calculateAge(loise))
