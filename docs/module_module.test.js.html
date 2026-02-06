@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: tests/validator.test.js</title>
+    <title>JSDoc: Source: module/module.test.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: tests/validator.test.js</h1>
+    <h1 class="page-title">Source: module/module.test.js</h1>
 
     
 
@@ -26,7 +26,7 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import { calculateAge, validatePostalCode } from "./../src/validator.js";
+            <pre class="prettyprint source linenums"><code>import { calculateAge } from "./module.js";
 
 /**
 * @function calculateAge
@@ -96,35 +96,6 @@ describe('calculateAge Unit Test Suites', () => {
 
     it('should throw an error for a future birth date', () => {
         expect(() => calculateAge(future)).toThrow("Age must be at least 18 years old.")
-    })
-})
-
-/**
- * @function validatePostalCode
- */
-describe('validatePostalCode Unit Test Suites', () => {
-    it('should return true for a valid french postal code (5 digits)', () => {
-        expect(validatePostalCode("33000")).toBe(true)
-    })
-
-    it('should throw an error when no argument is passed', () => {
-        expect(() => validatePostalCode()).toThrow("missing param code")
-    })
-
-    it('should throw an error when the argument is not a string', () => {
-        expect(() => validatePostalCode(33000)).toThrow("code must be a string")
-    })
-
-    it('should throw an error when the code is too short', () => {
-        expect(() => validatePostalCode("3300")).toThrow("code must be 5 digits")
-    })
-
-    it('should throw an error when the code is too long', () => {
-        expect(() => validatePostalCode("330000")).toThrow("code must be 5 digits")
-    })
-
-    it('should throw an error when the code contains invalid characters', () => {
-        expect(() => validatePostalCode("33A00")).toThrow("code must be 5 digits")
     })
 })</code></pre>
         </article>
