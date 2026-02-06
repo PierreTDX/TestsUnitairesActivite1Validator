@@ -1,4 +1,4 @@
-import { calculateAge, validatePostalCode, validateIdentity } from "./../src/validator.js";
+import { calculateAge, validatePostalCode, validateIdentity, validateEmail } from "./../src/validator.js";
 
 /**
 * @function calculateAge
@@ -130,5 +130,26 @@ describe('validateIdentity Unit Test Suites', () => {
 
     it('should throw an error for potential XSS injection', () => {
         expect(() => validateIdentity("<script>")).toThrow("name must only contain letters, accents and hyphens")
+    })
+})
+
+/**
+ * @function validateEmail
+ */
+describe('validateEmail Unit Test Suites', () => {
+    it('should return true for a valid email', () => {
+        expect(validateEmail("test@example.com")).toBe(true)
+    })
+
+    it('should throw an error when no argument is passed', () => {
+        expect(() => validateEmail()).toThrow("missing param email")
+    })
+
+    it('should throw an error when the argument is not a string', () => {
+        expect(() => validateEmail(123)).toThrow("email must be a string")
+    })
+
+    it('should throw an error when the email is invalid', () => {
+        expect(() => validateEmail("invalid-email")).toThrow("email is invalid")
     })
 })
