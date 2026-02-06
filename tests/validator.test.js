@@ -11,4 +11,9 @@ describe('calculateAge Unit Test Suites', () => {
         expect(calculateAge(loise)).toEqual(34)
 
     })
+
+    it('should throw a "missing param p" error', () => {
+        expect(() => calculateAge()).toThrow("missing param p")
+
+    })
 })

@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "doc": "jsdoc validator.js -d docs"
+    "doc": "jsdoc module/validator.js -d docs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
     "@babel/preset-env": "^7.29.0",
     "babel-jest": "^30.2.0",
