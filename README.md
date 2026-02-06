@@ -81,5 +81,5 @@ npm run jsdoc
 
 Une fois les commandes ci-dessus exécutées, vous pouvez consulter les rapports générés :
 
-*    **Documentation Technique (JSDoc)** : [Ouvrir docs/index.html](../docs/index.html)
-*    **Rapport de Couverture (Coverage)** : [Ouvrir coverage/lcov-report/index.html](../coverage/lcov-report/index.html)
+*    **Documentation Technique (JSDoc)** : [Ouvrir docs/index.html](docs/index.html)
+*    **Rapport de Couverture (Coverage)** : [Ouvrir coverage/lcov-report/index.html](coverage/lcov-report/index.html)
