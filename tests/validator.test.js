@@ -1,4 +1,4 @@
-import { calculateAge } from "./../src/validator.js";
+import { calculateAge, validatePostalCode } from "./../src/validator.js";
 
 /**
 * @function calculateAge
@@ -68,5 +68,34 @@ describe('calculateAge Unit Test Suites', () => {
 
     it('should throw an error for a future birth date', () => {
         expect(() => calculateAge(future)).toThrow("Age must be at least 18 years old.")
+    })
+})
+
+/**
+ * @function validatePostalCode
+ */
+describe('validatePostalCode Unit Test Suites', () => {
+    it('should return true for a valid french postal code (5 digits)', () => {
+        expect(validatePostalCode("33000")).toBe(true)
+    })
+
+    it('should throw an error when no argument is passed', () => {
+        expect(() => validatePostalCode()).toThrow("missing param code")
+    })
+
+    it('should throw an error when the argument is not a string', () => {
+        expect(() => validatePostalCode(33000)).toThrow("code must be a string")
+    })
+
+    it('should throw an error when the code is too short', () => {
+        expect(() => validatePostalCode("3300")).toThrow("code must be 5 digits")
+    })
+
+    it('should throw an error when the code is too long', () => {
+        expect(() => validatePostalCode("330000")).toThrow("code must be 5 digits")
+    })
+
+    it('should throw an error when the code contains invalid characters', () => {
+        expect(() => validatePostalCode("33A00")).toThrow("code must be 5 digits")
     })
 })
