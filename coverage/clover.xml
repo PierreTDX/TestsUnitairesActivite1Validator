@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1770385864221" clover="3.2.0">
-  <project timestamp="1770385864221" name="All files">
-    <metrics statements="36" coveredstatements="36" conditionals="34" coveredconditionals="34" methods="2" coveredmethods="2" elements="72" coveredelements="72" complexity="0" loc="36" ncloc="36" packages="2" files="2" classes="2"/>
+<coverage generated="1770386100765" clover="3.2.0">
+  <project timestamp="1770386100766" name="All files">
+    <metrics statements="43" coveredstatements="43" conditionals="40" coveredconditionals="40" methods="3" coveredmethods="3" elements="86" coveredelements="86" complexity="0" loc="43" ncloc="43" packages="2" files="2" classes="2"/>
     <package name="module">
       <metrics statements="18" coveredstatements="18" conditionals="17" coveredconditionals="17" methods="1" coveredmethods="1"/>
       <file name="module.js" path="C:\Users\pierr\Documents\Ynov\Cours\Tests\Activite1\module\module.js">
@@ -27,9 +27,9 @@
       </file>
     </package>
     <package name="src">
-      <metrics statements="18" coveredstatements="18" conditionals="17" coveredconditionals="17" methods="1" coveredmethods="1"/>
+      <metrics statements="25" coveredstatements="25" conditionals="23" coveredconditionals="23" methods="2" coveredmethods="2"/>
       <file name="validator.js" path="C:\Users\pierr\Documents\Ynov\Cours\Tests\Activite1\src\validator.js">
-        <metrics statements="18" coveredstatements="18" conditionals="17" coveredconditionals="17" methods="1" coveredmethods="1"/>
+        <metrics statements="25" coveredstatements="25" conditionals="23" coveredconditionals="23" methods="2" coveredmethods="2"/>
         <line num="8" count="10" type="cond" truecount="2" falsecount="0"/>
         <line num="9" count="1" type="stmt"/>
         <line num="11" count="9" type="cond" truecount="2" falsecount="0"/>
@@ -48,6 +48,13 @@
         <line num="31" count="5" type="cond" truecount="2" falsecount="0"/>
         <line num="32" count="3" type="stmt"/>
         <line num="34" count="2" type="stmt"/>
+        <line num="44" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="45" count="1" type="stmt"/>
+        <line num="47" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="48" count="1" type="stmt"/>
+        <line num="50" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="51" count="3" type="stmt"/>
+        <line num="53" count="1" type="stmt"/>
       </file>
     </package>
   </project>

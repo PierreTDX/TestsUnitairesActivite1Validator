@@ -33,3 +33,22 @@ export function calculateAge(p) {
     }
     return age;
 }
+
+/**
+ * Validate a french postal code.
+ *
+ * @param {string} code The postal code to check.
+ * @return {boolean} True if the postal code is valid.
+ */
+export function validatePostalCode(code) {
+    if (!code) {
+        throw new Error("missing param code")
+    }
+    if (typeof code !== 'string') {
+        throw new Error("code must be a string")
+    }
+    if (!/^\d{5}$/.test(code)) {
+        throw new Error("code must be 5 digits")
+    }
+    return true;
+}
