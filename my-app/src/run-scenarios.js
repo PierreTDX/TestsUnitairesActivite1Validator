@@ -4,7 +4,7 @@
  * @author Pierre
  */
 
-import { calculateAge, validatePostalCode, validateIdentity, validateEmail, validateCity, ValidationError } from "../../src/validator.js";
+import { calculateAge, validatePostalCode, validateIdentity, validateEmail, validateCity, ValidationError } from "../src/utils/validator.js";
 
 console.log("=== Lancement de quelques scénarios exemples ===");
 
