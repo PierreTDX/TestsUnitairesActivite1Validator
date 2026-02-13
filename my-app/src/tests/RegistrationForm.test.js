@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import RegistrationForm from '../pages/RegistrationForm';
+import * as validator from '../utils/validator';
 
 describe('RegistrationForm Integration Tests', () => {
   beforeEach(() => {
@@ -246,5 +247,43 @@ describe('RegistrationForm Integration Tests', () => {
     const emailInput = screen.getByTestId('email-input');
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     expect(emailInput).toHaveValue('test@example.com');
+  });
+
+  test('displays error when storage fails', async () => {
+    render(<RegistrationForm />);
+
+    const validDate = new Date();
+    validDate.setFullYear(validDate.getFullYear() - 20);
+    const dateString = validDate.toISOString().split('T')[0];
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'jean@example.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    const saveSpy = jest.spyOn(validator, 'saveToLocalStorage').mockImplementation(() => {
+      throw new Error('Storage quota exceeded');
+    });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('submit-error')).toBeInTheDocument();
+      expect(screen.getByTestId('submit-error')).toHaveTextContent('Storage quota exceeded');
+    });
+
+    saveSpy.mockRestore();
+  });
+
+  test('shows errors when submitting invalid form (bypassing disabled button)', () => {
+    const { container } = render(<RegistrationForm />);
+    const form = container.querySelector('form');
+
+    fireEvent.submit(form);
+
+    expect(screen.getByTestId('firstName-error')).toBeInTheDocument();
+    expect(screen.queryByTestId('success-message')).not.toBeInTheDocument();
   });
 });
