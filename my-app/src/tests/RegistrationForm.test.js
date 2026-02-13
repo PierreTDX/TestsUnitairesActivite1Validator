@@ -2,10 +2,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import RegistrationForm from '../pages/RegistrationForm';
 
-describe('RegistrationForm - Step 1 Basic Rendering', () => {
-  test('renders form title', () => {
-    render(<RegistrationForm />);
-    expect(screen.getByText(/Registration Form/i)).toBeInTheDocument();
+describe('RegistrationForm Integration Tests', () => {
+  beforeEach(() => {
+    localStorage.clear();
   });
 
   test('renders all form fields', () => {
@@ -17,5 +16,11 @@ describe('RegistrationForm - Step 1 Basic Rendering', () => {
     expect(screen.getByLabelText(/Birth Date/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/City/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Postal Code/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Register/i })).toBeInTheDocument();
+  });
+
+  test('renders form title', () => {
+    render(<RegistrationForm />);
+    expect(screen.getByText(/Registration Form/i)).toBeInTheDocument();
   });
 });
