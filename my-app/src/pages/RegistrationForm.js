@@ -36,6 +36,31 @@ const RegistrationForm = () => {
         }
     };
 
+    const handleBlur = (e) => {
+        const { name, value } = e.target;
+        let errorMsg = '';
+        try {
+            if (name === 'firstName') validateIdentity(value);
+            if (name === 'lastName') validateIdentity(value);
+            if (name === 'email') validateEmail(value);
+            if (name === 'postalCode') validatePostalCode(value);
+            if (name === 'city') validateCity(value);
+            if (name === 'birthDate') calculateAge({ birth: new Date(value) });
+        } catch (e) {
+            errorMsg = e.message;
+        }
+
+        if (errorMsg) {
+            setErrors(prev => ({ ...prev, [name]: errorMsg }));
+        }
+    };
+
+    // Check if form is valid for disabling the button
+    const isFormValid = () => {
+        const { isValid } = validateForm(formData);
+        return isValid;
+    };
+
     const validateForm = (data) => {
         const errors = {};
 
@@ -125,6 +150,7 @@ const RegistrationForm = () => {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         className={errors.firstName ? 'error' : ''}
                         data-testid="firstName-input"
                     />
@@ -143,6 +169,7 @@ const RegistrationForm = () => {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         className={errors.lastName ? 'error' : ''}
                         data-testid="lastName-input"
                     />
@@ -161,6 +188,7 @@ const RegistrationForm = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         className={errors.email ? 'error' : ''}
                         data-testid="email-input"
                     />
@@ -179,6 +207,7 @@ const RegistrationForm = () => {
                         name="birthDate"
                         value={formData.birthDate}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         className={errors.birthDate ? 'error' : ''}
                         data-testid="birthDate-input"
                     />
@@ -197,6 +226,7 @@ const RegistrationForm = () => {
                         name="city"
                         value={formData.city}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         className={errors.city ? 'error' : ''}
                         data-testid="city-input"
                     />
@@ -215,6 +245,7 @@ const RegistrationForm = () => {
                         name="postalCode"
                         value={formData.postalCode}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         className={errors.postalCode ? 'error' : ''}
                         data-testid="postalCode-input"
                         maxLength="5"
@@ -232,7 +263,7 @@ const RegistrationForm = () => {
                     </div>
                 )}
 
-                <button type="submit" className="submit-button" data-testid="submit-button">
+                <button type="submit" className="submit-button" data-testid="submit-button" disabled={!isFormValid()}>
                     Register
                 </button>
             </form>

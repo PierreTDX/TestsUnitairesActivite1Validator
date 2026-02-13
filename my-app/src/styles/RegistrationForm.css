@@ -301,6 +301,25 @@
   box-shadow: 0 0 10px rgba(0, 225, 255, 0.3);
 }
 
+.submit-button:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.2);
+  cursor: not-allowed;
+  box-shadow: none;
+  animation: none;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.submit-button:disabled::before {
+  display: none;
+}
+
+.submit-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.1);
+}
+
 /* ── Responsive ── */
 @media (max-width: 540px) {
   .registration-form-container {
