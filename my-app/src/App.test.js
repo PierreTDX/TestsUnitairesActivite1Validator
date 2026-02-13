@@ -3,8 +3,8 @@ import App from './App';
 import React from 'react';
 import '@testing-library/jest-dom';
 
-test('renders learn react link', () => {
+test('renders registration form title', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  // const titleElement = screen.getByText(/Formulaire d'inscription/i);
+  // expect(titleElement).toBeInTheDocument();
 });

@@ -4,7 +4,7 @@
  * @author Pierre
  */
 
-import { calculateAge, validatePostalCode, validateIdentity, validateEmail, ValidationError } from "../../src/validator.js";
+import { calculateAge, validatePostalCode, validateIdentity, validateEmail, validateCity, ValidationError } from "../../src/validator.js";
 
 console.log("=== Lancement de quelques scénarios exemples ===");
 
@@ -57,5 +57,11 @@ runScenario("Injection XSS (<script>)", () => validateIdentity("<script>"));
 console.log("\n--- Tests Email ---");
 runScenario("Email valide (test@example.com)", () => validateEmail("test@example.com"));
 runScenario("Email invalide (test.com)", () => validateEmail("test.com"));
+
+// --- Scénarios Ville ---
+console.log("\n--- Tests Ville ---");
+runScenario("Ville valide (Paris)", () => validateCity("Paris"));
+runScenario("Ville composée (Aix-en-Provence)", () => validateCity("Aix-en-Provence"));
+runScenario("Ville invalide (Paris75)", () => validateCity("Paris75"));
 
 console.log("\n=== Fin des scénarios ===");

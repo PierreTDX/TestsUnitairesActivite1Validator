@@ -1,4 +1,4 @@
-import { calculateAge, validatePostalCode, validateIdentity, validateEmail } from "../../src/validator.js";
+import { calculateAge, validatePostalCode, validateIdentity, validateEmail, validateCity, saveToLocalStorage, getFromLocalStorage } from "../../src/utils/validator.js";
 
 /**
 * @function calculateAge
@@ -174,5 +174,78 @@ describe('validateEmail Unit Test Suites', () => {
 
     it('should throw an error when the email is invalid', () => {
         expect(() => validateEmail("invalid-email")).toThrow("email is invalid")
+    })
+})
+
+/**
+ * @function validateCity
+ */
+describe('validateCity Unit Test Suites', () => {
+    it('should return true for a valid city', () => {
+        expect(validateCity("Paris")).toBe(true)
+    })
+
+    it('should return true for a city with accents, spaces, hyphens and apostrophes', () => {
+        expect(validateCity("L'Haÿ-les-Roses")).toBe(true)
+    })
+
+    it('should throw an error when no argument is passed', () => {
+        expect(() => validateCity()).toThrow("missing param city")
+    })
+
+    it('should throw an error when the argument is not a string', () => {
+        expect(() => validateCity(123)).toThrow("city must be a string")
+    })
+
+    it('should throw an error when the city contains numbers', () => {
+        expect(() => validateCity("Paris75")).toThrow("city must only contain letters, accents, spaces, hyphens and apostrophes")
+    })
+})
+
+/**
+ * @function LocalStorage
+ */
+describe('LocalStorage Unit Test Suites', () => {
+    beforeEach(() => {
+        localStorage.clear()
+        jest.restoreAllMocks()
+    })
+
+    describe('saveToLocalStorage', () => {
+        it('should save data correctly', () => {
+            const data = { firstName: 'Test' }
+            expect(saveToLocalStorage(data)).toBe(true)
+
+            const stored = JSON.parse(localStorage.getItem('registrations'))
+            expect(stored).toHaveLength(1)
+            expect(stored[0].firstName).toBe('Test')
+            expect(stored[0].timestamp).toBeDefined()
+        })
+
+        it('should throw a ValidationError when localStorage fails', () => {
+            jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+                throw new Error('QuotaExceededError')
+            })
+            expect(() => saveToLocalStorage({ firstName: 'Test' })).toThrow("Failed to save data to localStorage")
+        })
+    })
+
+    describe('getFromLocalStorage', () => {
+        it('should return an empty array if nothing is stored', () => {
+            expect(getFromLocalStorage()).toEqual([])
+        })
+
+        it('should return stored data', () => {
+            const data = [{ firstName: 'Test' }]
+            localStorage.setItem('registrations', JSON.stringify(data))
+            expect(getFromLocalStorage()).toEqual(data)
+        })
+
+        it('should throw a ValidationError when localStorage fails', () => {
+            jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+                throw new Error('AccessDenied')
+            })
+            expect(() => getFromLocalStorage()).toThrow("Failed to retrieve data from localStorage")
+        })
     })
 })
