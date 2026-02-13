@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import RegistrationForm from '../pages/RegistrationForm';
 
 describe('RegistrationForm Integration Tests', () => {
@@ -22,5 +22,22 @@ describe('RegistrationForm Integration Tests', () => {
   test('renders form title', () => {
     render(<RegistrationForm />);
     expect(screen.getByText(/Registration Form/i)).toBeInTheDocument();
+  });
+
+  test('submit button is disabled when form is empty', () => {
+    render(<RegistrationForm />);
+    const submitButton = screen.getByTestId('submit-button');
+    expect(submitButton).toBeDisabled();
+  });
+
+  test('displays error for invalid first name on blur', () => {
+    render(<RegistrationForm />);
+
+    const firstNameInput = screen.getByTestId('firstName-input');
+
+    fireEvent.change(firstNameInput, { target: { value: '123' } });
+    fireEvent.blur(firstNameInput);
+
+    expect(screen.getByTestId('firstName-error')).toBeInTheDocument();
   });
 });
