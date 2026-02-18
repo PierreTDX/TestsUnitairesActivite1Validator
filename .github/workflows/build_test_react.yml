@@ -29,6 +29,6 @@ jobs:
       - name: npm ci, build and test
         working-directory: ./my-app
         run: |
-          npm ci
+          npm install
           npm run build --if-present
           npm test
