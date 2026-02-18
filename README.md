@@ -19,6 +19,12 @@ Intégration du module dans un formulaire d'inscription React (`RegistrationForm
 *   **UX/UI** : Feedback visuel immédiat (champs rouges), bouton désactivé dynamiquement, notifications (Toaster).
 *   **Tests** : Tests d'intégration avec **React Testing Library** pour simuler des parcours utilisateurs complexes (erreurs, corrections, succès).
 
+### Activité 3 : Automatisation & Déploiement (CI/CD)
+Mise en place d'une usine logicielle complète avec GitHub Actions.
+*   **Objectif** : Automatiser les tests, la génération de documentation et le déploiement.
+*   **Outils** : GitHub Actions, Codecov, GitHub Pages.
+*   **Résultat** : À chaque push, le code est testé, la couverture vérifiée, et l'application (avec sa doc) est redéployée en production.
+
 ---
 
 ## Installation et Démarrage
@@ -48,14 +54,15 @@ Intégration du module dans un formulaire d'inscription React (`RegistrationForm
 
 *   `npm start` : Lance l'application en mode développement sur http://localhost:3000.
 *   `npm test` : Lance la suite complète de tests (Unitaires et Intégration) avec surveillance des fichiers.
-*   `npm run jsdoc` : Génère la documentation technique du code dans le dossier `docs/`.
+*   `npm run jsdoc` : Génère la documentation technique du code dans le dossier `./public/docs`.
 *   `npm run scenarios` : Exécute le script de démonstration des validateurs dans la console.
 
 ## Documentation
 
-*   [Détails Activité 1](my-app/Activite1.md)
-*   [Détails Activité 2](my-app/Activite2.md)
-*   [Plan de Test](my-app/TEST_PLAN.md)
+*   [Détails Activité 1](https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/Activite1.md)
+*   [Détails Activité 2](https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/Activite2.md)
+*   [Détails Activité 3](https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/Activite3.md)
+*   [Plan de Test](https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/TEST_PLAN.md)
 
 ---
 *Réalisé par Pierre TONDEUX*
