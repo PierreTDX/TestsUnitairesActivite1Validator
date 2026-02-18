@@ -121,6 +121,18 @@ describe('RegistrationForm Integration Tests', () => {
     expect(screen.getByTestId('birthDate-error')).toHaveTextContent(/18 years old/i);
   });
 
+  test('displays error for birth year before 1900', () => {
+    render(<RegistrationForm />);
+
+    const birthDateInput = screen.getByTestId('birthDate-input');
+
+    fireEvent.change(birthDateInput, { target: { value: '0008-01-01' } });
+    fireEvent.blur(birthDateInput);
+
+    expect(screen.getByTestId('birthDate-error')).toBeInTheDocument();
+    expect(screen.getByTestId('birthDate-error')).toHaveTextContent(/1900 or later/i);
+  });
+
   test('clears error message when user starts typing', () => {
     render(<RegistrationForm />);
 

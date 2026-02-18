@@ -78,6 +78,10 @@ describe('calculateAge Unit Test Suites', () => {
         expect(() => calculateAge(null)).toThrow("missing param p")
     })
 
+    it('should throw an error for a birth year before 1900', () => {
+        expect(() => calculateAge({ birth: new Date('0008-01-01') })).toThrow("Birth year must be 1900 or later.")
+    })
+
     it('should correctly calculate age for a person born on Feb 29th (Leap Year)', () => {
         const today = new Date();
         // 29 Février 2000 (Année bissextile, Adulte)

@@ -36,6 +36,9 @@ export function calculateAge(p) {
     if (isNaN(p.birth)) {
         throw new ValidationError("p.birth is an invalid Date", "INVALID_DATE")
     }
+    if (p.birth.getFullYear() < 1900) {
+        throw new ValidationError("Birth year must be 1900 or later.", "INVALID_YEAR")
+    }
 
     const today = new Date();
     let age = today.getFullYear() - p.birth.getFullYear();

@@ -251,6 +251,7 @@ const RegistrationForm = () => {
                         onBlur={handleBlur}
                         className={errors.birthDate ? 'error' : ''}
                         data-testid="birthDate-input"
+                        min="1900-01-01"
                     />
                     {errors.birthDate && (
                         <span className="error-message" data-testid="birthDate-error">
