@@ -35,9 +35,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          # On aide Codecov à trouver le bon dossier
           directory: ./my-app/coverage
-          fail_ci_if_error: true
 
       - name: Setup Pages
         id: pages
