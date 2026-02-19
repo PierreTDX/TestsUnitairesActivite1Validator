@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import RegistrationForm from '../pages/RegistrationForm';
 import * as validator from '../utils/validator';
 
@@ -13,8 +14,13 @@ describe('RegistrationForm Integration Tests', () => {
     localStorage.clear();
   });
 
+  // Helper function to render component with router context
+  const renderWithRouter = (component) => {
+    return render(<MemoryRouter>{component}</MemoryRouter>);
+  };
+
   test('renders all form fields', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     expect(screen.getByLabelText(/First Name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Last Name/i)).toBeInTheDocument();
@@ -26,18 +32,18 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('renders form title', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
     expect(screen.getByText(/Registration Form/i)).toBeInTheDocument();
   });
 
   test('submit button is disabled when form is empty', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
     const submitButton = screen.getByTestId('submit-button');
     expect(submitButton).toBeDisabled();
   });
 
   test('displays error for invalid first name on blur', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     const firstNameInput = screen.getByTestId('firstName-input');
 
@@ -48,7 +54,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('displays error for invalid email', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     const emailInput = screen.getByTestId('email-input');
 
@@ -59,7 +65,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('displays error for invalid postal code', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     const postalCodeInput = screen.getByTestId('postalCode-input');
 
@@ -70,7 +76,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('successfully submits valid form and saves to localStorage', async () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     const validDate = new Date();
     validDate.setFullYear(validDate.getFullYear() - 20);
@@ -106,7 +112,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('displays error for user under 18', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     const today = new Date();
     const date17YearsAgo = new Date(today.getFullYear() - 17, today.getMonth(), today.getDate());
@@ -122,7 +128,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('displays error for birth year before 1900', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     const birthDateInput = screen.getByTestId('birthDate-input');
 
@@ -134,7 +140,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('clears error message when user starts typing', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     const firstNameInput = screen.getByTestId('firstName-input');
 
@@ -149,7 +155,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('resets form after successful submission', async () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     const validDate = new Date();
     validDate.setFullYear(validDate.getFullYear() - 20);
@@ -189,7 +195,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('allows multiple valid submissions', async () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     const validDate = new Date();
     validDate.setFullYear(validDate.getFullYear() - 20);
@@ -229,7 +235,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('chaotic user behavior: invalid input disables button, correction enables it', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
     const submitButton = screen.getByTestId('submit-button');
     const emailInput = screen.getByTestId('email-input');
 
@@ -249,13 +255,13 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('postal code input has maxLength of 5', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
     const postalCodeInput = screen.getByTestId('postalCode-input');
     expect(postalCodeInput).toHaveAttribute('maxLength', '5');
   });
 
   test('form inputs update correctly', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     const firstNameInput = screen.getByTestId('firstName-input');
     fireEvent.change(firstNameInput, { target: { value: 'Jean' } });
@@ -267,7 +273,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('displays error when storage fails', async () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     const validDate = new Date();
     validDate.setFullYear(validDate.getFullYear() - 20);
@@ -295,7 +301,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('shows errors when submitting invalid form (bypassing disabled button)', () => {
-    const { container } = render(<RegistrationForm />);
+    const { container } = renderWithRouter(<RegistrationForm />);
     const form = container.querySelector('form');
 
     fireEvent.submit(form);
@@ -305,7 +311,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('displays error for invalid last name on blur', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
     const lastNameInput = screen.getByTestId('lastName-input');
     fireEvent.change(lastNameInput, { target: { value: '123' } });
     fireEvent.blur(lastNameInput);
@@ -313,7 +319,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('displays error for invalid city on blur', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
     const cityInput = screen.getByTestId('city-input');
     fireEvent.change(cityInput, { target: { value: 'Paris75' } });
     fireEvent.blur(cityInput);
@@ -321,7 +327,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('does not display error for valid values on blur', () => {
-    render(<RegistrationForm />);
+    renderWithRouter(<RegistrationForm />);
 
     // Test valid first name
     const firstNameInput = screen.getByTestId('firstName-input');

@@ -3,6 +3,7 @@
  * @description Main registration form component handling user interactions and validation.
  */
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { validateIdentity, validateEmail, validatePostalCode, validateCity, calculateAge, saveToLocalStorage } from '../utils/validator.js';
 import '../styles/RegistrationForm.css';
 
@@ -309,6 +310,9 @@ const RegistrationForm = () => {
                     Register
                 </button>
             </form>
+            <Link to="/" className="submit-button" data-testid="back-button">
+                Back to Home
+            </Link>
         </div>
     );
 };

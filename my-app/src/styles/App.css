@@ -1,0 +1,97 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Title ── */
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 2rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: transparent;
+  background: linear-gradient(135deg, #00e1ff, #7b2fff, #00e1ff);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+  margin-bottom: 2rem;
+  text-align: center;
+  position: relative;
+  animation: fade-slide-up 0.8s ease-out, shimmer 4s linear infinite;
+}
+
+
+/* ── Submit Button ── */
+.submit-button {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.5rem;
+  padding: 0.85rem 2rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #06080f;
+  background: linear-gradient(135deg, #00e1ff, #00b4cc);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: float 3s ease-in-out infinite;
+  animation-delay: 1s;
+  text-decoration: none;
+}
+
+.submit-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.25) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+  border-radius: 8px;
+}
+
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 20px rgba(0, 225, 255, 0.4),
+    0 0 60px rgba(0, 225, 255, 0.15);
+  background: linear-gradient(135deg, #00f0ff, #00d4f0);
+}
+
+.submit-button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 0 10px rgba(0, 225, 255, 0.3);
+}
+
+.submit-button:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.2);
+  cursor: not-allowed;
+  box-shadow: none;
+  animation: none;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.submit-button:disabled::before {
+  display: none;
+}
+
+.submit-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+
+/* ── Responsive ── */
+@media (max-width: 540px) {
+h1 {
+    font-size: 1.4rem;
+  }
+}

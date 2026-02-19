@@ -3,7 +3,10 @@
  * @description Root component of the application.
  */
 import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import RegistrationForm from './pages/RegistrationForm';
+import Home from './pages/Home';
+import './styles/App.css';
 
 /**
  * Module for React Components.
@@ -20,7 +23,10 @@ import RegistrationForm from './pages/RegistrationForm';
 function App() {
   return (
     <div className="App">
-      <RegistrationForm />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/registration" element={<RegistrationForm />} />
+      </Routes>
     </div>
   );
 }
