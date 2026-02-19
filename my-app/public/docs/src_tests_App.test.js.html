@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/tests/App.test.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/tests/App.test.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file App.test.js
+ * @description Integration tests for the App component.
+ * Verifies routing logic, initial rendering, and full user flows.
+ */
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import App from '../App';
+import React from 'react';
+import '@testing-library/jest-dom';
+import * as validator from '../utils/validator';
+
+test('renders home page by default', () => {
+  render(
+    &lt;MemoryRouter initialEntries={['/']}>
+      &lt;App />
+    &lt;/MemoryRouter>
+  );
+  const titleElement = screen.getByText(/Registered Users/i);
+  expect(titleElement).toBeInTheDocument();
+});
+
+test('navigates to registration page', () => {
+  render(
+    &lt;MemoryRouter initialEntries={['/']}>
+      &lt;App />
+    &lt;/MemoryRouter>
+  );
+  fireEvent.click(screen.getByText(/Go to Registration/i));
+  expect(screen.getByText(/Registration Form/i)).toBeInTheDocument();
+});
+
+test('renders registration page directly on specific route', () => {
+  render(
+    &lt;MemoryRouter initialEntries={['/registration']}>
+      &lt;App />
+    &lt;/MemoryRouter>
+  );
+  expect(screen.getByText(/Registration Form/i)).toBeInTheDocument();
+});
+
+test('handles error when loading users gracefully', () => {
+  // Mock console.error to avoid polluting test output
+  const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+
+  // Mock getFromLocalStorage to throw an error
+  jest.spyOn(validator, 'getFromLocalStorage').mockImplementation(() => {
+    throw new Error('Storage access denied');
+  });
+
+  render(
+    &lt;MemoryRouter>
+      &lt;App />
+    &lt;/MemoryRouter>
+  );
+
+  // Verify error was logged (message matches App.js) and component didn't crash
+  expect(consoleSpy).toHaveBeenCalledWith("Error loading initial data", expect.any(Error));
+  expect(screen.getByText(/Registered Users/i)).toBeInTheDocument();
+
+  // Cleanup
+  consoleSpy.mockRestore();
+  jest.restoreAllMocks();
+});
+
+test('full registration flow updates user list', async () => {
+  localStorage.clear();
+
+  render(
+    &lt;MemoryRouter initialEntries={['/registration']}>
+      &lt;App />
+    &lt;/MemoryRouter>
+  );
+
+  // Fill form with valid data
+  fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'New' } });
+  fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'User' } });
+  fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'new@user.com' } });
+  fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: '1990-01-01' } });
+  fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'City' } });
+  fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '12345' } });
+
+  // Submit
+  fireEvent.click(screen.getByTestId('submit-button'));
+
+  // Wait for success message
+  await waitFor(() => expect(screen.getByText(/Registration successful!/i)).toBeInTheDocument());
+
+  // Navigate back to home manually
+  fireEvent.click(screen.getByText(/Back to Home/i));
+
+  // Verify redirection to Home and presence of new user
+  expect(screen.getByText(/Registered Users/i)).toBeInTheDocument();
+  expect(screen.getByText('New User')).toBeInTheDocument();
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 19 2026 14:21:45 GMT+0100 (heure normale d’Europe centrale)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

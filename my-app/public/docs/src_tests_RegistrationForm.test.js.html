@@ -33,16 +33,26 @@
  */
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import RegistrationForm from '../pages/RegistrationForm';
-import * as validator from '../utils/validator';
 
 describe('RegistrationForm Integration Tests', () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
+  /**
+   * Helper function to render component with router context.
+   * Necessary because the component uses Link or useNavigate.
+   * @param {React.ReactNode} component - The component to render.
+   * @returns {Object} The render result from testing-library.
+   */
+  const renderWithRouter = (component) => {
+    return render(&lt;MemoryRouter>{component}&lt;/MemoryRouter>);
+  };
+
   test('renders all form fields', () => {
-    render(&lt;RegistrationForm />);
+    renderWithRouter(&lt;RegistrationForm />);
 
     expect(screen.getByLabelText(/First Name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Last Name/i)).toBeInTheDocument();
@@ -54,18 +64,18 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('renders form title', () => {
-    render(&lt;RegistrationForm />);
+    renderWithRouter(&lt;RegistrationForm />);
     expect(screen.getByText(/Registration Form/i)).toBeInTheDocument();
   });
 
   test('submit button is disabled when form is empty', () => {
-    render(&lt;RegistrationForm />);
+    renderWithRouter(&lt;RegistrationForm />);
     const submitButton = screen.getByTestId('submit-button');
     expect(submitButton).toBeDisabled();
   });
 
   test('displays error for invalid first name on blur', () => {
-    render(&lt;RegistrationForm />);
+    renderWithRouter(&lt;RegistrationForm />);
 
     const firstNameInput = screen.getByTestId('firstName-input');
 
@@ -76,7 +86,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('displays error for invalid email', () => {
-    render(&lt;RegistrationForm />);
+    renderWithRouter(&lt;RegistrationForm />);
 
     const emailInput = screen.getByTestId('email-input');
 
@@ -87,7 +97,7 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('displays error for invalid postal code', () => {
-    render(&lt;RegistrationForm />);
+    renderWithRouter(&lt;RegistrationForm />);
 
     const postalCodeInput = screen.getByTestId('postalCode-input');
 
@@ -97,8 +107,9 @@ describe('RegistrationForm Integration Tests', () => {
     expect(screen.getByTestId('postalCode-error')).toBeInTheDocument();
   });
 
-  test('successfully submits valid form and saves to localStorage', async () => {
-    render(&lt;RegistrationForm />);
+  test('successfully submits valid form and calls onUserAdd', async () => {
+    const mockOnUserAdd = jest.fn();
+    renderWithRouter(&lt;RegistrationForm onUserAdd={mockOnUserAdd} />);
 
     const validDate = new Date();
     validDate.setFullYear(validDate.getFullYear() - 20);
@@ -129,12 +140,11 @@ describe('RegistrationForm Integration Tests', () => {
       expect(screen.getByTestId('success-message')).toBeInTheDocument();
     });
 
-    const savedData = JSON.parse(localStorage.getItem('registrations'));
-    expect(savedData).toHaveLength(1);
+    expect(mockOnUserAdd).toHaveBeenCalledTimes(1);
   });
 
   test('displays error for user under 18', () => {
-    render(&lt;RegistrationForm />);
+    renderWithRouter(&lt;RegistrationForm />);
 
     const today = new Date();
     const date17YearsAgo = new Date(today.getFullYear() - 17, today.getMonth(), today.getDate());
@@ -149,8 +159,20 @@ describe('RegistrationForm Integration Tests', () => {
     expect(screen.getByTestId('birthDate-error')).toHaveTextContent(/18 years old/i);
   });
 
+  test('displays error for birth year before 1900', () => {
+    renderWithRouter(&lt;RegistrationForm />);
+
+    const birthDateInput = screen.getByTestId('birthDate-input');
+
+    fireEvent.change(birthDateInput, { target: { value: '0008-01-01' } });
+    fireEvent.blur(birthDateInput);
+
+    expect(screen.getByTestId('birthDate-error')).toBeInTheDocument();
+    expect(screen.getByTestId('birthDate-error')).toHaveTextContent(/1900 or later/i);
+  });
+
   test('clears error message when user starts typing', () => {
-    render(&lt;RegistrationForm />);
+    renderWithRouter(&lt;RegistrationForm />);
 
     const firstNameInput = screen.getByTestId('firstName-input');
 
@@ -164,9 +186,9 @@ describe('RegistrationForm Integration Tests', () => {
     expect(screen.queryByTestId('firstName-error')).not.toBeInTheDocument();
   });
 
-  test('resets form after successful submission', async () => {
-    render(&lt;RegistrationForm />);
-
+  test('calls onUserAdd with correct data', async () => {
+    const mockOnUserAdd = jest.fn();
+    renderWithRouter(&lt;RegistrationForm onUserAdd={mockOnUserAdd} />);
     const validDate = new Date();
     validDate.setFullYear(validDate.getFullYear() - 20);
     const dateString = validDate.toISOString().split('T')[0];
@@ -193,7 +215,26 @@ describe('RegistrationForm Integration Tests', () => {
 
     fireEvent.click(screen.getByTestId('submit-button'));
 
-    // Check that form is reset
+    expect(mockOnUserAdd).toHaveBeenCalled();
+  });
+
+  test('resets form after successful submission', async () => {
+    const mockOnUserAdd = jest.fn();
+    renderWithRouter(&lt;RegistrationForm onUserAdd={mockOnUserAdd} />);
+
+    const validDate = new Date();
+    validDate.setFullYear(validDate.getFullYear() - 20);
+    const dateString = validDate.toISOString().split('T')[0];
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'jean@example.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
     await waitFor(() => {
       expect(screen.getByTestId('firstName-input')).toHaveValue('');
       expect(screen.getByTestId('lastName-input')).toHaveValue('');
@@ -204,48 +245,35 @@ describe('RegistrationForm Integration Tests', () => {
     });
   });
 
-  test('allows multiple valid submissions', async () => {
-    render(&lt;RegistrationForm />);
+  test('displays error when parent component throws error (e.g. storage full)', async () => {
+    // Simulate an error coming from the parent (App.js)
+    const mockOnUserAdd = jest.fn().mockImplementation(() => {
+      throw new Error('Storage quota exceeded');
+    });
+
+    renderWithRouter(&lt;RegistrationForm onUserAdd={mockOnUserAdd} />);
 
     const validDate = new Date();
     validDate.setFullYear(validDate.getFullYear() - 20);
     const dateString = validDate.toISOString().split('T')[0];
 
-    // First submission
     fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
     fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
     fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'jean@example.com' } });
     fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
     fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
     fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
     fireEvent.click(screen.getByTestId('submit-button'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('success-message')).toBeInTheDocument();
+      expect(screen.getByTestId('submit-error')).toBeInTheDocument();
+      expect(screen.getByTestId('submit-error')).toHaveTextContent('Storage quota exceeded');
     });
-
-    // Second submission
-    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Marie' } });
-    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Martin' } });
-    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'marie@example.com' } });
-    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
-    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Lyon' } });
-    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '69001' } });
-    fireEvent.click(screen.getByTestId('submit-button'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('success-message')).toBeInTheDocument();
-    });
-
-    // Verify both are saved
-    const savedData = JSON.parse(localStorage.getItem('registrations'));
-    expect(savedData).toHaveLength(2);
-    expect(savedData[0].firstName).toBe('Jean');
-    expect(savedData[1].firstName).toBe('Marie');
   });
 
   test('chaotic user behavior: invalid input disables button, correction enables it', () => {
-    render(&lt;RegistrationForm />);
+    renderWithRouter(&lt;RegistrationForm />);
     const submitButton = screen.getByTestId('submit-button');
     const emailInput = screen.getByTestId('email-input');
 
@@ -265,13 +293,13 @@ describe('RegistrationForm Integration Tests', () => {
   });
 
   test('postal code input has maxLength of 5', () => {
-    render(&lt;RegistrationForm />);
+    renderWithRouter(&lt;RegistrationForm />);
     const postalCodeInput = screen.getByTestId('postalCode-input');
     expect(postalCodeInput).toHaveAttribute('maxLength', '5');
   });
 
   test('form inputs update correctly', () => {
-    render(&lt;RegistrationForm />);
+    renderWithRouter(&lt;RegistrationForm />);
 
     const firstNameInput = screen.getByTestId('firstName-input');
     fireEvent.change(firstNameInput, { target: { value: 'Jean' } });
@@ -282,8 +310,77 @@ describe('RegistrationForm Integration Tests', () => {
     expect(emailInput).toHaveValue('test@example.com');
   });
 
-  test('displays error when storage fails', async () => {
-    render(&lt;RegistrationForm />);
+  test('shows errors when submitting invalid form (bypassing disabled button)', () => {
+    const { container } = renderWithRouter(&lt;RegistrationForm />);
+    const form = container.querySelector('form');
+
+    fireEvent.submit(form);
+
+    expect(screen.getByTestId('firstName-error')).toBeInTheDocument();
+    expect(screen.queryByTestId('success-message')).not.toBeInTheDocument();
+  });
+
+  test('displays error for invalid last name on blur', () => {
+    renderWithRouter(&lt;RegistrationForm />);
+    const lastNameInput = screen.getByTestId('lastName-input');
+    fireEvent.change(lastNameInput, { target: { value: '123' } });
+    fireEvent.blur(lastNameInput);
+    expect(screen.getByTestId('lastName-error')).toBeInTheDocument();
+  });
+
+  test('displays error for invalid city on blur', () => {
+    renderWithRouter(&lt;RegistrationForm />);
+    const cityInput = screen.getByTestId('city-input');
+    fireEvent.change(cityInput, { target: { value: 'Paris75' } });
+    fireEvent.blur(cityInput);
+    expect(screen.getByTestId('city-error')).toBeInTheDocument();
+  });
+
+  test('does not display error for valid values on blur', () => {
+    renderWithRouter(&lt;RegistrationForm />);
+
+    // Test valid first name
+    const firstNameInput = screen.getByTestId('firstName-input');
+    fireEvent.change(firstNameInput, { target: { value: 'Pierre' } });
+    fireEvent.blur(firstNameInput);
+
+    // Verify no error is shown
+    expect(screen.queryByTestId('firstName-error')).not.toBeInTheDocument();
+  });
+
+  test('clears success message when user starts typing', async () => {
+    const mockOnUserAdd = jest.fn();
+    renderWithRouter(&lt;RegistrationForm onUserAdd={mockOnUserAdd} />);
+
+    // Fill valid form
+    const validDate = new Date();
+    validDate.setFullYear(validDate.getFullYear() - 20);
+    const dateString = validDate.toISOString().split('T')[0];
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'jean@example.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    // Submit
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    // Check success message
+    await waitFor(() => {
+      expect(screen.getByTestId('success-message')).toBeInTheDocument();
+    });
+
+    // Type something to trigger handleChange
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jeannot' } });
+
+    // Check success message gone
+    expect(screen.queryByTestId('success-message')).not.toBeInTheDocument();
+  });
+
+  test('handles submission gracefully when onUserAdd is not provided', async () => {
+    renderWithRouter(&lt;RegistrationForm />); // No onUserAdd prop
 
     const validDate = new Date();
     validDate.setFullYear(validDate.getFullYear() - 20);
@@ -296,56 +393,11 @@ describe('RegistrationForm Integration Tests', () => {
     fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
     fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
 
-    const saveSpy = jest.spyOn(validator, 'saveToLocalStorage').mockImplementation(() => {
-      throw new Error('Storage quota exceeded');
-    });
-
     fireEvent.click(screen.getByTestId('submit-button'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('submit-error')).toBeInTheDocument();
-      expect(screen.getByTestId('submit-error')).toHaveTextContent('Storage quota exceeded');
+      expect(screen.getByTestId('success-message')).toBeInTheDocument();
     });
-
-    saveSpy.mockRestore();
-  });
-
-  test('shows errors when submitting invalid form (bypassing disabled button)', () => {
-    const { container } = render(&lt;RegistrationForm />);
-    const form = container.querySelector('form');
-
-    fireEvent.submit(form);
-
-    expect(screen.getByTestId('firstName-error')).toBeInTheDocument();
-    expect(screen.queryByTestId('success-message')).not.toBeInTheDocument();
-  });
-
-  test('displays error for invalid last name on blur', () => {
-    render(&lt;RegistrationForm />);
-    const lastNameInput = screen.getByTestId('lastName-input');
-    fireEvent.change(lastNameInput, { target: { value: '123' } });
-    fireEvent.blur(lastNameInput);
-    expect(screen.getByTestId('lastName-error')).toBeInTheDocument();
-  });
-
-  test('displays error for invalid city on blur', () => {
-    render(&lt;RegistrationForm />);
-    const cityInput = screen.getByTestId('city-input');
-    fireEvent.change(cityInput, { target: { value: 'Paris75' } });
-    fireEvent.blur(cityInput);
-    expect(screen.getByTestId('city-error')).toBeInTheDocument();
-  });
-
-  test('does not display error for valid values on blur', () => {
-    render(&lt;RegistrationForm />);
-
-    // Test valid first name
-    const firstNameInput = screen.getByTestId('firstName-input');
-    fireEvent.change(firstNameInput, { target: { value: 'Pierre' } });
-    fireEvent.blur(firstNameInput);
-
-    // Verify no error is shown
-    expect(screen.queryByTestId('firstName-error')).not.toBeInTheDocument();
   });
 });</code></pre>
         </article>
@@ -357,13 +409,13 @@ describe('RegistrationForm Integration Tests', () => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Wed Feb 18 2026 12:54:07 GMT+0100 (heure normale d’Europe centrale)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 19 2026 14:21:45 GMT+0100 (heure normale d’Europe centrale)
 </footer>
 
 <script> prettyPrint(); </script>

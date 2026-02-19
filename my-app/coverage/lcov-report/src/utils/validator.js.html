@@ -225,7 +225,14 @@
 <a name='L160'></a><a href='#L160'>160</a>
 <a name='L161'></a><a href='#L161'>161</a>
 <a name='L162'></a><a href='#L162'>162</a>
-<a name='L163'></a><a href='#L163'>163</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -238,6 +245,7 @@
 <span class="cline-any cline-yes">489x</span>
 <span class="cline-any cline-yes">489x</span>
 <span class="cline-any cline-yes">489x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -287,6 +295,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">116x</span>
 <span class="cline-any cline-yes">93x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -297,6 +306,7 @@
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -325,6 +335,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">115x</span>
 <span class="cline-any cline-yes">68x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -335,6 +346,7 @@
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">39x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -363,6 +375,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
@@ -373,6 +386,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -408,6 +422,7 @@ export class ValidationError extends Error {
  *
  * @param {object} p An object representing a person, implementing a birth Date parameter.
  * @return {number} The age in years of p.
+ * @throws {ValidationError} If params are missing, invalid type, or age &lt; 18.
  */
 export function calculateAge(p) {
     if (!p) {
@@ -447,6 +462,7 @@ export function calculateAge(p) {
  *
  * @param {string} code The postal code to check.
  * @return {boolean} True if the postal code is valid.
+ * @throws {ValidationError} If code is missing, not a string, or invalid format.
  */
 export function validatePostalCode(code) {
     if (!code) {
@@ -466,6 +482,7 @@ export function validatePostalCode(code) {
  *
  * @param {string} name The name to check.
  * @return {boolean} True if the name is valid.
+ * @throws {ValidationError} If name is missing, not a string, or contains invalid characters.
  */
 export function validateIdentity(name) {
     if (!name) {
@@ -485,6 +502,7 @@ export function validateIdentity(name) {
  *
  * @param {string} email The email to check.
  * @return {boolean} True if the email is valid.
+ * @throws {ValidationError} If email is missing, not a string, or invalid format.
  */
 export function validateEmail(email) {
     if (!email) {
@@ -504,6 +522,7 @@ export function validateEmail(email) {
  *
  * @param {string} city The city to check.
  * @return {boolean} True if the city is valid.
+ * @throws {ValidationError} If city is missing, not a string, or contains invalid characters.
  */
 export function validateCity(city) {
     if (!city) {
@@ -523,6 +542,7 @@ export function validateCity(city) {
  *
  * @param {Object} formData The data to save.
  * @return {boolean} True if the save was successful.
+ * @throws {ValidationError} If localStorage access fails.
  */
 export function saveToLocalStorage(formData) {
     try {
@@ -542,6 +562,7 @@ export function saveToLocalStorage(formData) {
  * Retrieve data from localStorage.
  *
  * @return {Array} Array of records.
+ * @throws {ValidationError} If localStorage access fails.
  */
 export function getFromLocalStorage() {
     try {
@@ -556,7 +577,7 @@ export function getFromLocalStorage() {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-19T13:11:22.729Z
+                at 2026-02-19T13:20:57.368Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
