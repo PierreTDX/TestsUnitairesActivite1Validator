@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: cypress/e2e/spec.cy.js</title>
+    <title>JSDoc: Source: src/pages/NotFound.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: cypress/e2e/spec.cy.js</h1>
+    <h1 class="page-title">Source: src/pages/NotFound.js</h1>
 
     
 
@@ -27,15 +27,36 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @file spec.cy.js
- * @description Basic E2E test to verify the application deployment.
+ * @file NotFound.js
+ * @description 404 Not Found page component.
  */
-describe('Home page spec', () => {
-    it('deployed react app to localhost', () => {
-        cy.visit('http://localhost:3000')
-        cy.contains('Registered Users').should('be.visible')
-    })
-})</code></pre>
+import React from 'react';
+import { Link } from 'react-router-dom';
+import '../styles/NotFound.css';
+
+/**
+ * Not Found page component.
+ * Displays a 404 error message with navigation back to home.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered 404 page.
+ */
+const NotFound = () => {
+    return (
+        &lt;div className="not-found-container">
+            &lt;div className="light-container">
+                &lt;h1>404&lt;/h1>
+            &lt;/div>
+            &lt;h2>Page Not Found&lt;/h2>
+            &lt;p>The page you are looking for does not exist.&lt;/p>
+            &lt;Link to="/" className="submit-button" data-testid="home-button">
+                Back to Home
+            &lt;/Link>
+        &lt;/div>
+    );
+};
+
+export default NotFound;</code></pre>
         </article>
     </section>
 

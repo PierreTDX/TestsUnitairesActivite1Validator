@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: cypress/e2e/spec.cy.js</title>
+    <title>JSDoc: Source: src/tests/NotFound.test.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: cypress/e2e/spec.cy.js</h1>
+    <h1 class="page-title">Source: src/tests/NotFound.test.js</h1>
 
     
 
@@ -27,15 +27,47 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @file spec.cy.js
- * @description Basic E2E test to verify the application deployment.
+ * @file NotFound.test.js
+ * @description Integration tests for the NotFound component.
+ * Verifies rendering of error messages and navigation link.
  */
-describe('Home page spec', () => {
-    it('deployed react app to localhost', () => {
-        cy.visit('http://localhost:3000')
-        cy.contains('Registered Users').should('be.visible')
-    })
-})</code></pre>
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import NotFound from '../pages/NotFound';
+
+describe('NotFound Page Integration Tests', () => {
+
+    /**
+     * Helper to render with Router context (needed for &lt;Link>).
+     * Wraps the component in a MemoryRouter.
+     * @param {React.ReactNode} component - The component to render.
+     * @returns {Object} The render result.
+     */
+    const renderWithRouter = (component) => {
+        return render(&lt;MemoryRouter>{component}&lt;/MemoryRouter>);
+    };
+
+    test('renders 404 error code', () => {
+        renderWithRouter(&lt;NotFound />);
+        expect(screen.getByText('404')).toBeInTheDocument();
+    });
+
+    test('renders error message', () => {
+        renderWithRouter(&lt;NotFound />);
+        expect(screen.getByText(/Page Not Found/i)).toBeInTheDocument();
+        expect(screen.getByText(/The page you are looking for does not exist/i)).toBeInTheDocument();
+    });
+
+    test('renders link to home page', () => {
+        renderWithRouter(&lt;NotFound />);
+
+        const link = screen.getByTestId('home-button');
+        expect(link).toBeInTheDocument();
+        expect(link).toHaveAttribute('href', '/');
+        expect(link).toHaveTextContent(/Back to Home/i);
+    });
+});</code></pre>
         </article>
     </section>
 
