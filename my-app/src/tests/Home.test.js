@@ -71,4 +71,9 @@ describe('Home Page Integration Tests', () => {
         expect(link).toBeInTheDocument();
         expect(link).toHaveAttribute('href', '/registration');
     });
+
+    test('renders correctly when users prop is not provided (defaults to empty)', () => {
+        renderWithRouter(<Home />);
+        expect(screen.getByText(/No users registered yet/i)).toBeInTheDocument();
+    });
 });

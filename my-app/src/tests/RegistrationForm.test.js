@@ -153,8 +153,6 @@ describe('RegistrationForm Integration Tests', () => {
     expect(screen.queryByTestId('firstName-error')).not.toBeInTheDocument();
   });
 
-  // Note: Form reset is no longer easily testable due to redirection
-  // But we can verify that onUserAdd is called
   test('calls onUserAdd with correct data', async () => {
     const mockOnUserAdd = jest.fn();
     renderWithRouter(<RegistrationForm onUserAdd={mockOnUserAdd} />);
@@ -315,5 +313,57 @@ describe('RegistrationForm Integration Tests', () => {
 
     // Verify no error is shown
     expect(screen.queryByTestId('firstName-error')).not.toBeInTheDocument();
+  });
+
+  test('clears success message when user starts typing', async () => {
+    const mockOnUserAdd = jest.fn();
+    renderWithRouter(<RegistrationForm onUserAdd={mockOnUserAdd} />);
+
+    // Fill valid form
+    const validDate = new Date();
+    validDate.setFullYear(validDate.getFullYear() - 20);
+    const dateString = validDate.toISOString().split('T')[0];
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'jean@example.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    // Submit
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    // Check success message
+    await waitFor(() => {
+      expect(screen.getByTestId('success-message')).toBeInTheDocument();
+    });
+
+    // Type something to trigger handleChange
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jeannot' } });
+
+    // Check success message gone
+    expect(screen.queryByTestId('success-message')).not.toBeInTheDocument();
+  });
+
+  test('handles submission gracefully when onUserAdd is not provided', async () => {
+    renderWithRouter(<RegistrationForm />); // No onUserAdd prop
+
+    const validDate = new Date();
+    validDate.setFullYear(validDate.getFullYear() - 20);
+    const dateString = validDate.toISOString().split('T')[0];
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'jean@example.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('success-message')).toBeInTheDocument();
+    });
   });
 });

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import React from 'react';
@@ -56,4 +56,35 @@ test('handles error when loading users gracefully', () => {
   // Cleanup
   consoleSpy.mockRestore();
   jest.restoreAllMocks();
+});
+
+test('full registration flow updates user list', async () => {
+  localStorage.clear();
+
+  render(
+    <MemoryRouter initialEntries={['/registration']}>
+      <App />
+    </MemoryRouter>
+  );
+
+  // Fill form with valid data
+  fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'New' } });
+  fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'User' } });
+  fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'new@user.com' } });
+  fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: '1990-01-01' } });
+  fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'City' } });
+  fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '12345' } });
+
+  // Submit
+  fireEvent.click(screen.getByTestId('submit-button'));
+
+  // Wait for success message
+  await waitFor(() => expect(screen.getByText(/Registration successful!/i)).toBeInTheDocument());
+
+  // Navigate back to home manually
+  fireEvent.click(screen.getByText(/Back to Home/i));
+
+  // Verify redirection to Home and presence of new user
+  expect(screen.getByText(/Registered Users/i)).toBeInTheDocument();
+  expect(screen.getByText('New User')).toBeInTheDocument();
 });

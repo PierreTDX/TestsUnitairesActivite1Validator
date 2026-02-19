@@ -3,7 +3,7 @@
  * @description Main registration form component handling user interactions and validation.
  */
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { validateIdentity, validateEmail, validatePostalCode, validateCity, calculateAge } from '../utils/validator.js';
 import '../styles/RegistrationForm.css';
 
@@ -28,7 +28,6 @@ const RegistrationForm = ({ onUserAdd }) => {
 
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState('');
-    const navigate = useNavigate();
 
     /**
      * Handles input changes.
@@ -170,8 +169,6 @@ const RegistrationForm = ({ onUserAdd }) => {
                     city: '',
                     postalCode: ''
                 });
-                // redirect to home after a short delay to show success message
-                setTimeout(() => navigate('/'), 3000);
             } catch (e) {
                 setErrors({ submit: e.message });
             }
