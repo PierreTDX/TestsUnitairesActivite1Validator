@@ -93,3 +93,13 @@ test('full registration flow updates user list', async () => {
   expect(screen.getByText(/Registered Users/i)).toBeInTheDocument();
   expect(screen.getByText('New User')).toBeInTheDocument();
 });
+
+test('renders 404 page for unknown routes', () => {
+  render(
+    <MemoryRouter initialEntries={['/unknown-route']}>
+      <App />
+    </MemoryRouter>
+  );
+  expect(screen.getByText('404')).toBeInTheDocument();
+  expect(screen.getByText(/Page Not Found/i)).toBeInTheDocument();
+});
