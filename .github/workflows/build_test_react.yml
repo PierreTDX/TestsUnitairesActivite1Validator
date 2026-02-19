@@ -32,6 +32,7 @@ jobs:
           npm run build --if-present
           npm test
       - name: Cypress run
+        working-directory: ./my-app
         uses: cypress-io/github-action@v6
         with:
           build: npm run build
