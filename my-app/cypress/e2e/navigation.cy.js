@@ -83,6 +83,13 @@ describe('Navigation & State Management Scenarios', () => {
         // Verify displayed error
         cy.get('[data-testid="email-error"]').should('be.visible');
 
+        // 3b. Duplicate email attempt
+        cy.get('[data-testid="email-input"]').clear().type('morpheus@matrix.com'); // Existing email
+        cy.get('[data-testid="email-input"]').blur();
+
+        // Verify displayed error for duplicate
+        cy.get('[data-testid="email-error"]').should('contain', 'email already exists');
+
         // Button must be disabled
         cy.get('[data-testid="submit-button"]').should('be.disabled');
 
