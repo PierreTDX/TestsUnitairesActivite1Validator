@@ -1,6 +1,9 @@
 # E2E & Cohérence des Tests (Activité 4)
-## Réalisé par Pierre TONDEUX le 19/02/2026
-
+## Réalisé par Pierre TONDEUX le 19/02/2026  
+*   **Dépôt GitHub** : [https://github.com/PierreTDX/Test_et_Test_unitaire](https://github.com/PierreTDX/Test_et_Test_unitaire)
+  
+---  
+  
 Cette quatrième activité marque l'évolution de l'application vers une **Single Page Application (SPA)** et l'introduction des tests de bout en bout (**E2E**) avec **Cypress**. L'objectif est de valider les parcours utilisateurs complets et la persistance des données lors de la navigation.  
 (https://docs.cypress.io/app/references/configuration , https://filiphric.com/cypress-basics-before-beforeeach-after-aftereach)
 
