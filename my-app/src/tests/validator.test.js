@@ -192,6 +192,16 @@ describe('validateEmail Unit Test Suites', () => {
 
         localStorage.removeItem('registrations');
     })
+
+    it('should return true when localStorage access fails (fail-open)', () => {
+        const spy = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+            throw new Error('Storage error');
+        });
+
+        expect(validateEmail("test@example.com")).toBe(true);
+
+        spy.mockRestore();
+    })
 })
 
 /**
