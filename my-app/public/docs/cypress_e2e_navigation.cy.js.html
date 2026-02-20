@@ -36,11 +36,21 @@ describe('Navigation &amp; State Management Scenarios', () => {
     // Reset state before each test to ensure isolation
     beforeEach(() => {
         cy.clearLocalStorage();
+
+        // Intercept GET users (Initial load) - Return empty list by default
+        cy.intercept('GET', '**/users', { body: [] }).as('getUsers');
+
+        // Intercept POST users (Registration)
+        cy.intercept('POST', '**/users', {
+            statusCode: 201,
+            body: { id: 101 } // JSONPlaceholder style response
+        }).as('addUser');
     });
 
     it('Nominal Scenario: Valid user addition and persistence check', () => {
         // 1. Navigate to Home (/)
         cy.visit('/');
+        cy.wait('@getUsers').its('response.statusCode').should('eq', 200);
 
         // Verify "0 registered users" and empty list (users = [])
         cy.contains('No users registered yet').should('be.visible');
@@ -62,6 +72,9 @@ describe('Navigation &amp; State Management Scenarios', () => {
         // Submission
         cy.get('[data-testid="submit-button"]').click();
 
+        // Wait for API call
+        cy.wait('@addUser').its('response.statusCode').should('eq', 201);
+
         // Verify success message
         cy.get('[data-testid="success-message"]').should('contain', 'Registration successful');
 
@@ -78,7 +91,7 @@ describe('Navigation &amp; State Management Scenarios', () => {
 
     it('Error Scenario: Invalid addition attempt and integrity check', () => {
         // Prerequisite: Simulate previous state (1 registered) by injecting data
-        // into localStorage before loading the page.
+        // via network intercept (for UI) and localStorage (for validator)
         const existingUser = [{
             firstName: 'Morpheus',
             lastName: 'Nebuchadnezzar',
@@ -89,12 +102,18 @@ describe('Navigation &amp; State Management Scenarios', () => {
             timestamp: new Date().toISOString()
         }];
 
+        // Override the default intercept for this test (Simulate API returning 1 user)
+        cy.intercept('GET', '**/users', { body: existingUser }).as('getExistingUsers');
+
+        // Inject into localStorage because validator.js checks uniqueness against LS
         cy.window().then((win) => {
             win.localStorage.setItem('registrations', JSON.stringify(existingUser));
         });
 
         // 1. Navigate to Home (/) with pre-loaded state
         cy.visit('/');
+        cy.wait('@getExistingUsers');
+
         cy.contains('1 registered user').should('be.visible');
         cy.get('.user-card').should('have.length', 1);
         cy.contains('Morpheus').should('be.visible');
@@ -168,6 +187,63 @@ describe('Navigation &amp; State Management Scenarios', () => {
         cy.url().should('eq', Cypress.config().baseUrl + '/#/');
         cy.contains('Registered Users').should('be.visible');
     });
+
+    it('Handles 400 Bad Request (Email exists)', () => {
+        // 1. Navigate to Registration
+        cy.visit('/#/registration');
+
+        // 2. Intercept POST to return 400
+        cy.intercept('POST', '**/users', {
+            statusCode: 400,
+            body: { message: 'Email already exists' }
+        }).as('addUserError');
+
+        // 3. Fill form
+        cy.get('[data-testid="firstName-input"]').type('Neo');
+        cy.get('[data-testid="lastName-input"]').type('Anderson');
+        cy.get('[data-testid="email-input"]').type('duplicate@matrix.com');
+        cy.get('[data-testid="birthDate-input"]').type('1990-01-01');
+        cy.get('[data-testid="city-input"]').type('Zion');
+        cy.get('[data-testid="postalCode-input"]').type('10101');
+
+        cy.get('[data-testid="submit-button"]').click();
+        cy.wait('@addUserError');
+
+        // 4. Verify Error Toast
+        cy.get('[data-testid="submit-error"]').should('contain', 'Email already exists');
+    });
+
+    it('Handles 500 Server Error', () => {
+        cy.visit('/#/registration');
+
+        cy.intercept('POST', '**/users', {
+            statusCode: 500
+        }).as('addUserServerCrash');
+
+        cy.get('[data-testid="firstName-input"]').type('Neo');
+        cy.get('[data-testid="lastName-input"]').type('Anderson');
+        cy.get('[data-testid="email-input"]').type('crash@matrix.com');
+        cy.get('[data-testid="birthDate-input"]').type('1990-01-01');
+        cy.get('[data-testid="city-input"]').type('Zion');
+        cy.get('[data-testid="postalCode-input"]').type('10101');
+
+        cy.get('[data-testid="submit-button"]').click();
+        cy.wait('@addUserServerCrash');
+
+        cy.get('[data-testid="submit-error"]').should('contain', 'Server is down');
+    });
+
+    it('Handles 500 Server Error on Initial Load', () => {
+        // Simulate server crash on initial data fetch
+        cy.intercept('GET', '**/users', {
+            statusCode: 500
+        }).as('getUsersError');
+
+        cy.visit('/');
+        cy.wait('@getUsersError');
+
+        cy.get('[data-testid="global-error-toast"]').should('contain', 'Server is down');
+    });
 });</code></pre>
         </article>
     </section>
@@ -178,13 +254,13 @@ describe('Navigation &amp; State Management Scenarios', () => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#API_TOKEN">API_TOKEN</a></li><li><a href="global.html#API_URL">API_URL</a></li><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#Toast">Toast</a></li><li><a href="global.html#addUser">addUser</a></li><li><a href="global.html#axiosConfig">axiosConfig</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 19 2026 19:57:16 GMT+0100 (heure normale d’Europe centrale)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Feb 20 2026 14:46:25 GMT+0100 (heure normale d’Europe centrale)
 </footer>
 
 <script> prettyPrint(); </script>

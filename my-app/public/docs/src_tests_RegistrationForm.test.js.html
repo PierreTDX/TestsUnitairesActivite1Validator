@@ -32,7 +32,7 @@
  * Verifies UI behavior, validation logic integration, and localStorage interactions.
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import RegistrationForm from '../pages/RegistrationForm';
 
@@ -136,9 +136,11 @@ describe('RegistrationForm Integration Tests', () => {
 
     fireEvent.click(screen.getByTestId('submit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('success-message')).toBeInTheDocument();
-    });
+    // Wait for success message to appear (confirms async work is done)
+    await waitFor(() => expect(screen.getByTestId('success-message')).toBeInTheDocument());
+
+    // Then ensure loading is gone
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
 
     expect(mockOnUserAdd).toHaveBeenCalledTimes(1);
   });
@@ -215,7 +217,95 @@ describe('RegistrationForm Integration Tests', () => {
 
     fireEvent.click(screen.getByTestId('submit-button'));
 
-    expect(mockOnUserAdd).toHaveBeenCalled();
+    // Wait for the mock to be called
+    await waitFor(() => expect(mockOnUserAdd).toHaveBeenCalled());
+
+    // Ensure loading is gone
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
+  });
+
+  test('displays loading toast during submission', async () => {
+    // Mock a slow API call (100ms delay)
+    const mockOnUserAdd = jest.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+    renderWithRouter(&lt;RegistrationForm onUserAdd={mockOnUserAdd} />);
+
+    const validDate = new Date();
+    validDate.setFullYear(validDate.getFullYear() - 20);
+    const dateString = validDate.toISOString().split('T')[0];
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'jean@example.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    expect(screen.getByTestId('loading-toast')).toBeInTheDocument();
+    expect(screen.getByTestId('loading-toast')).toHaveTextContent('Registration in progress...');
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument();
+    });
+  });
+
+  test('closes success toast when close button is clicked', async () => {
+    const mockOnUserAdd = jest.fn();
+    renderWithRouter(&lt;RegistrationForm onUserAdd={mockOnUserAdd} />);
+
+    const validDate = new Date();
+    validDate.setFullYear(validDate.getFullYear() - 20);
+    const dateString = validDate.toISOString().split('T')[0];
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'jean@example.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    // Wait for success toast to appear (implies submission done)
+    const successToast = await screen.findByTestId('success-message');
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
+
+    const closeButton = within(successToast).getByRole('button');
+    fireEvent.click(closeButton);
+
+    expect(successToast).not.toBeInTheDocument();
+
+    // Ensure loading state is cleared
+  });
+
+  test('closes submit error toast when close button is clicked', async () => {
+    const mockOnUserAdd = jest.fn().mockRejectedValue(new Error('Submission failed'));
+    renderWithRouter(&lt;RegistrationForm onUserAdd={mockOnUserAdd} />);
+
+    const validDate = new Date();
+    validDate.setFullYear(validDate.getFullYear() - 20);
+    const dateString = validDate.toISOString().split('T')[0];
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'jean@example.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    // Wait for error toast to appear (implies submission done)
+    const errorToast = await screen.findByTestId('submit-error');
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
+
+    const closeButton = within(errorToast).getByRole('button');
+    fireEvent.click(closeButton);
+
+    expect(errorToast).not.toBeInTheDocument();
+
+    // Ensure loading state is cleared
   });
 
   test('resets form after successful submission', async () => {
@@ -235,6 +325,10 @@ describe('RegistrationForm Integration Tests', () => {
 
     fireEvent.click(screen.getByTestId('submit-button'));
 
+    // Wait for loading to disappear
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
+
+    // Check form reset
     await waitFor(() => {
       expect(screen.getByTestId('firstName-input')).toHaveValue('');
       expect(screen.getByTestId('lastName-input')).toHaveValue('');
@@ -265,6 +359,10 @@ describe('RegistrationForm Integration Tests', () => {
     fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
 
     fireEvent.click(screen.getByTestId('submit-button'));
+
+    // Wait for error message
+    await waitFor(() => expect(screen.getByTestId('submit-error')).toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
 
     await waitFor(() => {
       expect(screen.getByTestId('submit-error')).toBeInTheDocument();
@@ -368,9 +466,8 @@ describe('RegistrationForm Integration Tests', () => {
     fireEvent.click(screen.getByTestId('submit-button'));
 
     // Check success message
-    await waitFor(() => {
-      expect(screen.getByTestId('success-message')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByTestId('success-message')).toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
 
     // Type something to trigger handleChange
     fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jeannot' } });
@@ -395,9 +492,8 @@ describe('RegistrationForm Integration Tests', () => {
 
     fireEvent.click(screen.getByTestId('submit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('success-message')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByTestId('success-message')).toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
   });
 });</code></pre>
         </article>
@@ -409,13 +505,13 @@ describe('RegistrationForm Integration Tests', () => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#API_TOKEN">API_TOKEN</a></li><li><a href="global.html#API_URL">API_URL</a></li><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#Toast">Toast</a></li><li><a href="global.html#addUser">addUser</a></li><li><a href="global.html#axiosConfig">axiosConfig</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 19 2026 19:57:16 GMT+0100 (heure normale d’Europe centrale)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Feb 20 2026 14:46:25 GMT+0100 (heure normale d’Europe centrale)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: src/index.js</title>
+    <title>JSDoc: Source: src/services/api.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: src/index.js</h1>
+    <h1 class="page-title">Source: src/services/api.js</h1>
 
     
 
@@ -27,30 +27,67 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @file index.js
- * @description Entry point of the React application.
- * Renders the App component into the DOM and configures the router.
+ * @file api.js
+ * @description Service module for handling API requests.
+ * Centralizes Axios configuration and endpoints for user management.
  */
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import axios from 'axios';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  &lt;React.StrictMode>
-    &lt;HashRouter>
-      &lt;App />
-    &lt;/HashRouter>
-  &lt;/React.StrictMode>
-);
+/**
+ * Base URL for the API.
+ * Defaults to JSONPlaceholder if not provided in environment variables.
+ * @constant {string}
+ */
+const API_URL = process.env.REACT_APP_API_URL || 'https://jsonplaceholder.typicode.com';
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
-</code></pre>
+/**
+ * API Token for authentication.
+ * Retrieved from environment variables.
+ * @constant {string|undefined}
+ */
+const API_TOKEN = process.env.REACT_APP_API_TOKEN;
+
+// If API_TOKEN is defined, include it in the headers for all requests
+/**
+ * Axios configuration object.
+ * Includes Authorization header if API_TOKEN is present.
+ * @constant {Object|undefined}
+ */
+const axiosConfig = API_TOKEN ? {
+    headers: { Authorization: `Bearer ${API_TOKEN}` }
+} : undefined;
+
+/**
+ * Fetches the list of users from the API.
+ *
+ * @async
+ * @function getUsers
+ * @returns {Promise&lt;Array&lt;Object>>} A promise that resolves to an array of user objects.
+ */
+export const getUsers = async () => {
+    const response = await axios.get(`${API_URL}/users`, axiosConfig);
+    return response.data;
+};
+
+/**
+ * Adds a new user to the API.
+ *
+ * @async
+ * @function addUser
+ * @param {Object} user - The user object to add.
+ * @returns {Promise&lt;Object>} A promise that resolves to the added user object (with ID).
+ */
+export const addUser = async (user) => {
+    const response = await axios.post(`${API_URL}/users`, user, axiosConfig);
+    return response.data;
+};
+
+const api = {
+    getUsers,
+    addUser,
+};
+
+export default api;</code></pre>
         </article>
     </section>
 

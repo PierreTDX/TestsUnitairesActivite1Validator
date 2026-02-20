@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: src/index.js</title>
+    <title>JSDoc: Source: src/components/Toast.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: src/index.js</h1>
+    <h1 class="page-title">Source: src/components/Toast.js</h1>
 
     
 
@@ -27,30 +27,46 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @file index.js
- * @description Entry point of the React application.
- * Renders the App component into the DOM and configures the router.
+ * @file Toast.js
+ * @description Reusable Toast component for notifications (Error, Success, Loading).
  */
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React, { useEffect } from 'react';
+import '../styles/Toast.css';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  &lt;React.StrictMode>
-    &lt;HashRouter>
-      &lt;App />
-    &lt;/HashRouter>
-  &lt;/React.StrictMode>
-);
+/**
+ * Toast Component.
+ *
+ * @param {Object} props
+ * @param {string} props.message - The message to display. If null/empty, toast is hidden.
+ * @param {'error'|'success'|'loading'} [props.type='info'] - The type of toast.
+ * @param {Function} [props.onClose] - Function to call when closing the toast.
+ * @param {number} [props.duration=5000] - Duration in ms before auto-close (ignored if type is loading).
+ */
+const Toast = ({ message, type = 'info', onClose, duration = 5000, ...props }) => {
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
-</code></pre>
+    useEffect(() => {
+        // Auto-close logic: Only if duration is set, onClose is provided, and it's not a loading state
+        if (message &amp;&amp; duration &amp;&amp; onClose &amp;&amp; type !== 'loading') {
+            const timer = setTimeout(() => {
+                onClose();
+            }, duration);
+            return () => clearTimeout(timer);
+        }
+    }, [message, duration, onClose, type]);
+
+    if (!message) return null;
+
+    return (
+        &lt;div className={`toast toast-${type}`} {...props}>
+            &lt;span>{message}&lt;/span>
+            {onClose &amp;&amp; type !== 'loading' &amp;&amp; (
+                &lt;button className="toast-close" onClick={onClose}>&amp;times;&lt;/button>
+            )}
+        &lt;/div>
+    );
+};
+
+export default Toast;</code></pre>
         </article>
     </section>
 

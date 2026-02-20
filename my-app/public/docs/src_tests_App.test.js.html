@@ -31,105 +31,322 @@
  * @description Integration tests for the App component.
  * Verifies routing logic, initial rendering, and full user flows.
  */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import React from 'react';
 import '@testing-library/jest-dom';
-import * as validator from '../utils/validator';
+import axios from 'axios';
 
-test('renders home page by default', () => {
-  render(
-    &lt;MemoryRouter initialEntries={['/']}>
-      &lt;App />
-    &lt;/MemoryRouter>
-  );
-  const titleElement = screen.getByText(/Registered Users/i);
-  expect(titleElement).toBeInTheDocument();
-});
+// Mock axios globally for this file
+jest.mock('axios');
 
-test('navigates to registration page', () => {
-  render(
-    &lt;MemoryRouter initialEntries={['/']}>
-      &lt;App />
-    &lt;/MemoryRouter>
-  );
-  fireEvent.click(screen.getByText(/Go to Registration/i));
-  expect(screen.getByText(/Registration Form/i)).toBeInTheDocument();
-});
-
-test('renders registration page directly on specific route', () => {
-  render(
-    &lt;MemoryRouter initialEntries={['/registration']}>
-      &lt;App />
-    &lt;/MemoryRouter>
-  );
-  expect(screen.getByText(/Registration Form/i)).toBeInTheDocument();
-});
-
-test('handles error when loading users gracefully', () => {
-  // Mock console.error to avoid polluting test output
-  const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
-
-  // Mock getFromLocalStorage to throw an error
-  jest.spyOn(validator, 'getFromLocalStorage').mockImplementation(() => {
-    throw new Error('Storage access denied');
+describe('App Integration Tests', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  render(
-    &lt;MemoryRouter>
-      &lt;App />
-    &lt;/MemoryRouter>
-  );
+  test('renders home page by default', async () => {
+    // Mock successful API call with data to ensure we can wait for it
+    axios.get.mockResolvedValue({ data: [{ firstName: 'TestUser', lastName: 'Test', email: 'test@test.com', timestamp: new Date().toISOString() }] });
 
-  // Verify error was logged (message matches App.js) and component didn't crash
-  expect(consoleSpy).toHaveBeenCalledWith("Error loading initial data", expect.any(Error));
-  expect(screen.getByText(/Registered Users/i)).toBeInTheDocument();
+    render(
+      &lt;MemoryRouter initialEntries={['/']}>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
 
-  // Cleanup
-  consoleSpy.mockRestore();
-  jest.restoreAllMocks();
-});
+    // Wait for the user to appear. This ensures useEffect completed and state updated.
+    expect(await screen.findByText('TestUser Test')).toBeInTheDocument();
 
-test('full registration flow updates user list', async () => {
-  localStorage.clear();
+    // Ensure loading is gone
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
+  });
 
-  render(
-    &lt;MemoryRouter initialEntries={['/registration']}>
-      &lt;App />
-    &lt;/MemoryRouter>
-  );
+  test('navigates to registration page', async () => {
+    axios.get.mockResolvedValue({ data: [] });
 
-  // Fill form with valid data
-  fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'New' } });
-  fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'User' } });
-  fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'new@user.com' } });
-  fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: '1990-01-01' } });
-  fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'City' } });
-  fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '12345' } });
+    render(
+      &lt;MemoryRouter initialEntries={['/']}>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
 
-  // Submit
-  fireEvent.click(screen.getByTestId('submit-button'));
+    // Wait for home to load
+    await screen.findByText(/Registered Users/i);
 
-  // Wait for success message
-  await waitFor(() => expect(screen.getByText(/Registration successful!/i)).toBeInTheDocument());
+    // Wait for initial loading to finish before navigating
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
 
-  // Navigate back to home manually
-  fireEvent.click(screen.getByText(/Back to Home/i));
+    fireEvent.click(screen.getByText(/Go to Registration/i));
+    expect(screen.getByText(/Registration Form/i)).toBeInTheDocument();
+  });
 
-  // Verify redirection to Home and presence of new user
-  expect(screen.getByText(/Registered Users/i)).toBeInTheDocument();
-  expect(screen.getByText('New User')).toBeInTheDocument();
-});
+  test('renders registration page directly on specific route', async () => {
+    axios.get.mockResolvedValue({ data: [] });
 
-test('renders 404 page for unknown routes', () => {
-  render(
-    &lt;MemoryRouter initialEntries={['/unknown-route']}>
-      &lt;App />
-    &lt;/MemoryRouter>
-  );
-  expect(screen.getByText('404')).toBeInTheDocument();
-  expect(screen.getByText(/Page Not Found/i)).toBeInTheDocument();
+    render(
+      &lt;MemoryRouter initialEntries={['/registration']}>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
+    expect(screen.getByText(/Registration Form/i)).toBeInTheDocument();
+
+    // Wait for initial App load to finish to avoid act warnings
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
+  });
+
+  test('handles error when loading users gracefully', async () => {
+    // Mock console.error to avoid polluting test output
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+
+    // Mock API failure
+    axios.get.mockRejectedValue(new Error('Network Error'));
+
+    render(
+      &lt;MemoryRouter>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
+
+    // Verify error message in UI
+    expect(await screen.findByText(/Failed to load users from API/i)).toBeInTheDocument();
+
+    // Verify error was logged
+    expect(consoleSpy).toHaveBeenCalledWith("Error loading initial data", expect.any(Error));
+
+    // Verify Home still renders (title)
+    expect(screen.getByText(/Registered Users/i)).toBeInTheDocument();
+
+    consoleSpy.mockRestore();
+
+    // Wait for loading to finish
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
+  });
+
+  test('displays server error when API returns 500 on initial load', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+    // Mock API failure with 500 status
+    axios.get.mockRejectedValue({ response: { status: 500 } });
+
+    render(
+      &lt;MemoryRouter initialEntries={['/']}>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
+
+    // Verify specific server error message
+    expect(await screen.findByText(/Server is down/i)).toBeInTheDocument();
+
+    // Wait for loading to finish
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
+    consoleSpy.mockRestore();
+  });
+
+  test('closes global error toast when close button is clicked', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+    // Mock API failure with 500 status on initial load
+    axios.get.mockRejectedValue({ response: { status: 500 } });
+
+    render(
+      &lt;MemoryRouter initialEntries={['/']}>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
+
+    const errorToast = await screen.findByTestId('global-error-toast');
+    const closeButton = within(errorToast).getByRole('button');
+    fireEvent.click(closeButton);
+
+    expect(errorToast).not.toBeInTheDocument();
+
+    // Wait for loading to finish
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
+    consoleSpy.mockRestore();
+  });
+
+  test('full registration flow updates user list', async () => {
+    // 1. Initial load (empty)
+    axios.get.mockResolvedValueOnce({ data: [] });
+    // 2. Post response
+    axios.post.mockResolvedValueOnce({ data: { id: 101 } });
+
+    render(
+      &lt;MemoryRouter initialEntries={['/registration']}>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
+
+    // Wait for initial load
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
+
+    // Fill form with valid data
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'New' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'User' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'new@user.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: '1990-01-01' } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'City' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '12345' } });
+
+    // Submit
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    // Wait for loading to finish FIRST
+    await waitFor(() => expect(screen.queryByText(/Registration in progress.../i)).not.toBeInTheDocument());
+
+    // Then check success message
+    expect(screen.getByText(/Registration successful!/i)).toBeInTheDocument();
+
+    // Navigate back to home manually
+    fireEvent.click(screen.getByText(/Back to Home/i));
+
+    // Verify redirection to Home
+    expect(screen.getByText(/Registered Users/i)).toBeInTheDocument();
+
+    // Verify new user is in the list (optimistic update or state update in App.js)
+    expect(screen.getByText('New User')).toBeInTheDocument();
+  });
+
+  test('renders 404 page for unknown routes', async () => {
+    axios.get.mockResolvedValue({ data: [] });
+
+    render(
+      &lt;MemoryRouter initialEntries={['/unknown-route']}>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
+    expect(screen.getByText('404')).toBeInTheDocument();
+    expect(screen.getByText(/Page Not Found/i)).toBeInTheDocument();
+
+    // Wait for initial load
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
+  });
+
+  test('displays specific error when API returns 400 (Email exists)', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+    // 1. Initial load
+    axios.get.mockResolvedValue({ data: [] });
+    // 2. Post response failure (400)
+    axios.post.mockRejectedValue({ response: { status: 400 } });
+
+    render(
+      &lt;MemoryRouter initialEntries={['/registration']}>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
+
+    // Wait for initial load
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
+
+    // Fill form
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'duplicate@test.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: '1990-01-01' } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Registration in progress.../i)).not.toBeInTheDocument();
+      expect(screen.getByTestId('submit-error')).toHaveTextContent('Email already exists');
+    });
+    consoleSpy.mockRestore();
+  });
+
+  test('displays server error when API returns 500', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+    axios.get.mockResolvedValue({ data: [] });
+    axios.post.mockRejectedValue({ response: { status: 500 } });
+
+    render(
+      &lt;MemoryRouter initialEntries={['/registration']}>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
+
+    // Wait for initial load
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
+
+    // Fill minimal valid form...
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    // ... (supposons que les autres champs sont remplis ou optionnels pour simplifier le test, sinon copier le bloc du dessus)
+    // Pour la brièveté ici, je reprends la logique de remplissage complet :
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'test@test.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: '1990-01-01' } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Registration in progress.../i)).not.toBeInTheDocument();
+      expect(screen.getByTestId('submit-error')).toHaveTextContent('Server is down');
+    });
+    consoleSpy.mockRestore();
+  });
+
+  test('displays generic error when API returns unknown error (Network Error)', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+    axios.get.mockResolvedValue({ data: [] });
+    axios.post.mockRejectedValue(new Error('Network Error'));
+
+    render(
+      &lt;MemoryRouter initialEntries={['/registration']}>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
+
+    // Wait for initial load
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'generic@test.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: '1990-01-01' } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Registration in progress.../i)).not.toBeInTheDocument();
+      expect(screen.getByTestId('submit-error')).toHaveTextContent('Failed to save user to API');
+    });
+    consoleSpy.mockRestore();
+  });
+
+  test('displays generic error when API returns unhandled status code', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+    axios.get.mockResolvedValue({ data: [] });
+    axios.post.mockRejectedValue({ response: { status: 418 } });
+
+    render(
+      &lt;MemoryRouter initialEntries={['/registration']}>
+        &lt;App />
+      &lt;/MemoryRouter>
+    );
+
+    // Wait for initial load
+    await waitFor(() => expect(screen.queryByTestId('app-loading-toast')).not.toBeInTheDocument());
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'teapot@test.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: '1990-01-01' } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Registration in progress.../i)).not.toBeInTheDocument();
+      expect(screen.getByTestId('submit-error')).toHaveTextContent('Failed to save user to API');
+    });
+    consoleSpy.mockRestore();
+  });
 });
 </code></pre>
         </article>
@@ -141,13 +358,13 @@ test('renders 404 page for unknown routes', () => {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#API_TOKEN">API_TOKEN</a></li><li><a href="global.html#API_URL">API_URL</a></li><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#Toast">Toast</a></li><li><a href="global.html#addUser">addUser</a></li><li><a href="global.html#axiosConfig">axiosConfig</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 19 2026 19:57:16 GMT+0100 (heure normale d’Europe centrale)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Feb 20 2026 14:46:25 GMT+0100 (heure normale d’Europe centrale)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -77,6 +77,13 @@
 <li><strong>Tests E2E</strong> : Implémentation de scénarios nominaux et d'erreurs avec <strong>Cypress</strong> (ex: Ajout utilisateur -&gt; Vérification liste Accueil).</li>
 <li><strong>Pyramide de Tests</strong> : Corrélation entre TU (règles), TI (composants) et E2E (parcours).</li>
 </ul>
+<h3>Activité 5 : Simulation d'API &amp; Résilience</h3>
+<p>Transition vers une architecture connectée (API REST) et sécurisation des tests.</p>
+<ul>
+<li><strong>Objectif</strong> : Tester le comportement de l'application face aux délais et erreurs réseaux (400, 500) sans dépendre d'un backend réel.</li>
+<li><strong>Technique</strong> : Mocking complet avec Jest (<code>jest.mock</code>) et Stubbing réseau avec Cypress (<code>cy.intercept</code>).</li>
+<li><strong>Résultat</strong> : Une application résiliente qui informe l'utilisateur en cas de panne, validée par des tests isolés et rapides.</li>
+</ul>
 <hr>
 <h2>Installation et Démarrage</h2>
 <h3>Prérequis</h3>
@@ -117,6 +124,7 @@
 <li><a href="https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/Activite2.md">Détails Activité 2</a></li>
 <li><a href="https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/Activite3.md">Détails Activité 3</a></li>
 <li><a href="https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/Activite4.md">Détails Activité 4</a></li>
+<li><a href="https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/Activite5.md">Détails Activité 5</a></li>
 <li><a href="https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/TEST_PLAN.md">Plan de Test</a></li>
 </ul>
 <hr>
@@ -366,6 +374,99 @@
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="src_App.js.html">src/App.js</a>, <a href="src_App.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>src/components/Toast.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Reusable Toast component for notifications (Error, Success, Loading).</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="src_components_Toast.js.html">src/components/Toast.js</a>, <a href="src_components_Toast.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
@@ -980,6 +1081,99 @@ Renders the App component into the DOM and configures the router.</div>
 
 <header>
     
+        <h2>src/services/api.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Service module for handling API requests.Centralizes Axios configuration and endpoints for user management.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="src_services_api.js.html">src/services/api.js</a>, <a href="src_services_api.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
         <h2>src/tests/App.test.js</h2>
         
     
@@ -1354,6 +1548,285 @@ Verifies UI behavior, validation logic integration, and localStorage interaction
 
 <header>
     
+        <h2>src/tests/Toast.test.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Unit tests for the Toast component.Verifies rendering, styling classes, and auto-close behavior.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="src_tests_Toast.test.js.html">src/tests/Toast.test.js</a>, <a href="src_tests_Toast.test.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>src/tests/api.test.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Unit tests for the API service configuration.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="src_tests_api.test.js.html">src/tests/api.test.js</a>, <a href="src_tests_api.test.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>src/tests/jest.standalone.config.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Jest configuration for standalone execution.Configures the test environment, coverage collection, and module mapping.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="src_tests_jest.standalone.config.js.html">src/tests/jest.standalone.config.js</a>, <a href="src_tests_jest.standalone.config.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
         <h2>src/tests/validator.test.js</h2>
         
     
@@ -1443,13 +1916,13 @@ Verifies UI behavior, validation logic integration, and localStorage interaction
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#API_TOKEN">API_TOKEN</a></li><li><a href="global.html#API_URL">API_URL</a></li><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#Toast">Toast</a></li><li><a href="global.html#addUser">addUser</a></li><li><a href="global.html#axiosConfig">axiosConfig</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 19 2026 19:57:16 GMT+0100 (heure normale d’Europe centrale)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Feb 20 2026 14:46:25 GMT+0100 (heure normale d’Europe centrale)
 </footer>
 
 <script> prettyPrint(); </script>

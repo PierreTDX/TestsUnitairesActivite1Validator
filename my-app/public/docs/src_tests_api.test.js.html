@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: src/index.js</title>
+    <title>JSDoc: Source: src/tests/api.test.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: src/index.js</h1>
+    <h1 class="page-title">Source: src/tests/api.test.js</h1>
 
     
 
@@ -27,30 +27,64 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @file index.js
- * @description Entry point of the React application.
- * Renders the App component into the DOM and configures the router.
+ * @file api.test.js
+ * @description Unit tests for the API service configuration.
  */
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import axios from 'axios';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  &lt;React.StrictMode>
-    &lt;HashRouter>
-      &lt;App />
-    &lt;/HashRouter>
-  &lt;/React.StrictMode>
-);
+jest.mock('axios');
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
-</code></pre>
+describe('API Service Configuration', () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+        jest.resetModules(); // Reset cache to allow re-importing module with different env
+        process.env = { ...originalEnv };
+    });
+
+    afterAll(() => {
+        process.env = originalEnv;
+    });
+
+    test('uses default URL if env var is missing', async () => {
+        delete process.env.REACT_APP_API_URL;
+        delete process.env.REACT_APP_API_TOKEN;
+        const { getUsers } = require('../services/api');
+        const axiosMock = require('axios');
+
+        axiosMock.get.mockResolvedValue({ data: [] });
+        await getUsers();
+
+        // Expect undefined as second arg because no token
+        expect(axiosMock.get).toHaveBeenCalledWith('https://jsonplaceholder.typicode.com/users', undefined);
+    });
+
+    test('uses env var URL if present', async () => {
+        process.env.REACT_APP_API_URL = 'http://custom-api.com';
+        delete process.env.REACT_APP_API_TOKEN;
+        const { getUsers } = require('../services/api');
+        const axiosMock = require('axios');
+
+        axiosMock.get.mockResolvedValue({ data: [] });
+        await getUsers();
+
+        expect(axiosMock.get).toHaveBeenCalledWith('http://custom-api.com/users', undefined);
+    });
+
+    test('uses API token in headers if present', async () => {
+        process.env.REACT_APP_API_TOKEN = 'secret-token-123';
+        const { getUsers } = require('../services/api');
+        const axiosMock = require('axios');
+
+        axiosMock.get.mockResolvedValue({ data: [] });
+        await getUsers();
+
+        expect(axiosMock.get).toHaveBeenCalledWith(
+            expect.any(String),
+            { headers: { Authorization: 'Bearer secret-token-123' } }
+        );
+    });
+});</code></pre>
         </article>
     </section>
 

@@ -33,6 +33,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { validateIdentity, validateEmail, validatePostalCode, validateCity, calculateAge } from '../utils/validator.js';
+import Toast from '../components/Toast';
 import '../styles/RegistrationForm.css';
 
 /**
@@ -44,9 +45,10 @@ import '../styles/RegistrationForm.css';
  * @param {Object} props - The component props.
  * @param {Function} props.onUserAdd - Callback function executed upon successful registration.
  *                                     Receives the user data object as an argument.
+ * @param {Array} [props.existingUsers] - List of existing users to check for duplicates.
  * @returns {JSX.Element} The rendered registration form.
  */
-const RegistrationForm = ({ onUserAdd }) => {
+const RegistrationForm = ({ onUserAdd, existingUsers = [] }) => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -58,6 +60,7 @@ const RegistrationForm = ({ onUserAdd }) => {
 
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     /**
      * Handles input changes.
@@ -98,7 +101,7 @@ const RegistrationForm = ({ onUserAdd }) => {
         try {
             if (name === 'firstName') validateIdentity(value);
             if (name === 'lastName') validateIdentity(value);
-            if (name === 'email') validateEmail(value);
+            if (name === 'email') validateEmail(value, existingUsers);
             if (name === 'postalCode') validatePostalCode(value);
             if (name === 'city') validateCity(value);
             if (name === 'birthDate') calculateAge({ birth: new Date(value) });
@@ -145,7 +148,7 @@ const RegistrationForm = ({ onUserAdd }) => {
         }
 
         try {
-            validateEmail(data.email);
+            validateEmail(data.email, existingUsers);
         } catch (e) {
             errors.email = e.message;
         }
@@ -178,16 +181,17 @@ const RegistrationForm = ({ onUserAdd }) => {
      *
      * @param {React.SyntheticEvent&lt;HTMLFormElement>} e - The submission event.
      */
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const validation = validateForm(formData);
 
         if (validation.isValid) {
+            setIsSubmitting(true);
             try {
-                // call onUserAdd to update App's state and localStorage
+                // call onUserAdd to update App's state and API
                 if (onUserAdd) {
-                    onUserAdd(formData);
+                    await onUserAdd(formData);
                 }
                 setSuccessMessage('Registration successful!');
                 setErrors({});
@@ -202,6 +206,8 @@ const RegistrationForm = ({ onUserAdd }) => {
                 });
             } catch (e) {
                 setErrors({ submit: e.message });
+            } finally {
+                setIsSubmitting(false);
             }
         } else {
             setErrors(validation.errors);
@@ -213,11 +219,33 @@ const RegistrationForm = ({ onUserAdd }) => {
         &lt;div className="registration-form-container">
             &lt;h1>Registration Form&lt;/h1>
 
-            {successMessage &amp;&amp; (
-                &lt;div className="success-message" data-testid="success-message">
-                    {successMessage}
-                &lt;/div>
-            )}
+            {/* Boutons de test pour les Toasts */}
+            {/* &lt;div style={{ position: 'fixed', top: 10, left: 10, zIndex: 10000, display: 'flex', gap: '5px' }}>
+                &lt;button type="button" onClick={() => setIsSubmitting(prev => !prev)}>Toggle Loading&lt;/button>
+                &lt;button type="button" onClick={() => setErrors(prev => ({ ...prev, submit: "Erreur critique simulée !" }))}>Trigger Error&lt;/button>
+                &lt;button type="button" onClick={() => setSuccessMessage("Opération réussie !")}>Trigger Success&lt;/button>
+                &lt;button type="button" onClick={() => { setErrors({}); setSuccessMessage(''); setIsSubmitting(false); }}>Clear All&lt;/button>
+            &lt;/div> */}
+
+            &lt;div className="toast-container">
+                &lt;Toast
+                    message={successMessage}
+                    type="success"
+                    onClose={() => setSuccessMessage('')}
+                    data-testid="success-message"
+                />
+                &lt;Toast
+                    message={errors.submit}
+                    type="error"
+                    onClose={() => setErrors(prev => ({ ...prev, submit: null }))}
+                    data-testid="submit-error"
+                />
+                &lt;Toast
+                    message={isSubmitting ? "Registration in progress..." : null}
+                    type="loading"
+                    data-testid="loading-toast"
+                />
+            &lt;/div>
 
             &lt;form onSubmit={handleSubmit} className="registration-form">
                 &lt;div className="form-group">
@@ -336,13 +364,7 @@ const RegistrationForm = ({ onUserAdd }) => {
                     )}
                 &lt;/div>
 
-                {errors.submit &amp;&amp; (
-                    &lt;div className="error-message" data-testid="submit-error">
-                        {errors.submit}
-                    &lt;/div>
-                )}
-
-                &lt;button type="submit" className="submit-button" data-testid="submit-button" disabled={!isFormValid()}>
+                &lt;button type="submit" className="submit-button" data-testid="submit-button" disabled={!isFormValid() || isSubmitting}>
                     Register
                 &lt;/button>
             &lt;/form>
@@ -364,13 +386,13 @@ export default RegistrationForm;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#API_TOKEN">API_TOKEN</a></li><li><a href="global.html#API_URL">API_URL</a></li><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#Toast">Toast</a></li><li><a href="global.html#addUser">addUser</a></li><li><a href="global.html#axiosConfig">axiosConfig</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 19 2026 19:57:16 GMT+0100 (heure normale d’Europe centrale)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Feb 20 2026 14:46:25 GMT+0100 (heure normale d’Europe centrale)
 </footer>
 
 <script> prettyPrint(); </script>

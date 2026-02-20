@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: src/index.js</title>
+    <title>JSDoc: Source: src/tests/jest.standalone.config.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: src/index.js</h1>
+    <h1 class="page-title">Source: src/tests/jest.standalone.config.js</h1>
 
     
 
@@ -27,30 +27,27 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @file index.js
- * @description Entry point of the React application.
- * Renders the App component into the DOM and configures the router.
+ * @file jest.standalone.config.js
+ * @description Jest configuration for standalone execution.
+ * Configures the test environment, coverage collection, and module mapping.
  */
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  &lt;React.StrictMode>
-    &lt;HashRouter>
-      &lt;App />
-    &lt;/HashRouter>
-  &lt;/React.StrictMode>
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
-</code></pre>
+module.exports = {
+    testEnvironment: "jsdom",
+    collectCoverageFrom: [
+        "src/**/*.{js,jsx}",
+        "!src/index.js",
+        "!src/reportWebVitals.js",
+        "!src/run-scenarios.js",
+        "!src/setupTests.js"
+    ],
+    moduleNameMapper: {
+        "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+        "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "jest-transform-stub"
+    },
+    transform: {
+        "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
+    }
+};</code></pre>
         </article>
     </section>
 

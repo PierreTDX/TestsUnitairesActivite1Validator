@@ -35,7 +35,8 @@ import { Routes, Route } from 'react-router-dom';
 import RegistrationForm from './pages/RegistrationForm';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
-import { getFromLocalStorage } from './utils/validator';
+import { getUsers, addUser } from './services/api';
+import Toast from './components/Toast';
 import './styles/App.css';
 
 /**
@@ -55,35 +56,86 @@ import './styles/App.css';
 function App() {
   // Shared state: List of registered users
   const [users, setUsers] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Load initial data from localStorage
+  // Load initial data from API
   useEffect(() => {
-    try {
-      const data = getFromLocalStorage();
-      setUsers(data);
-    } catch (error) {
-      console.error("Error loading initial data", error);
-    }
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const data = await getUsers();
+        setUsers(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error loading initial data", err);
+        let errorMessage = "Failed to load users from API";
+        if (err.response &amp;&amp; err.response.status === 500) {
+          errorMessage = "Server is down. Please try again later.";
+        }
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
   }, []);
 
   /**
-   * Handler to add a new user to the state and local storage.
+   * Handler to add a new user to the state and API.
    * This function is passed down to the RegistrationForm component.
    *
    * @param {Object} newUser - The user object created by the registration form.
    */
-  const handleAddUser = (newUser) => {
+  const handleAddUser = async (newUser) => {
     const userWithTimestamp = { ...newUser, timestamp: new Date().toISOString() };
-    const updatedUsers = [...users, userWithTimestamp];
-    setUsers(updatedUsers);
-    localStorage.setItem('registrations', JSON.stringify(updatedUsers));
+
+    try {
+      const savedUser = await addUser(userWithTimestamp);
+      setUsers([...users, { ...userWithTimestamp, ...savedUser }]);
+      setError(null);
+    } catch (err) {
+      console.error("Error adding user", err);
+
+      let errorMessage = "Failed to save user to API";
+      if (err.response) {
+        if (err.response.status === 400) {
+          errorMessage = "Email already exists"; // Error e-mail already exist
+        } else if (err.response.status === 500) {
+          errorMessage = "Server is down. Please try again later."; // server is down
+        }
+      }
+      // Throwing an error here will be caught by the RegistrationForm's try-catch and displayed as a Toast message.
+      throw new Error(errorMessage);
+    }
   };
 
   return (
     &lt;div className="App">
+      {/* Boutons de test pour les Toasts */}
+      {/* &lt;div style={{ position: 'fixed', top: 10, left: 10, zIndex: 10000, display: 'flex', gap: '5px' }}>
+        &lt;button onClick={() => setLoading(!loading)}>Toggle Loading&lt;/button>
+        &lt;button onClick={() => setError("Erreur critique du système !")}>Trigger Error&lt;/button>
+        &lt;button onClick={() => setError(null)}>Clear Error&lt;/button>
+      &lt;/div> */}
+
+      &lt;div className="toast-container">
+        &lt;Toast
+          message={error}
+          type="error"
+          onClose={() => setError(null)}
+          data-testid="global-error-toast"
+        />
+        &lt;Toast
+          message={loading ? "Synchronizing with Matrix..." : null}
+          type="loading"
+          data-testid="app-loading-toast"
+        />
+      &lt;/div>
+
       &lt;Routes>
         &lt;Route path="/" element={&lt;Home users={users} />} />
-        &lt;Route path="/registration" element={&lt;RegistrationForm onUserAdd={handleAddUser} />} />
+        &lt;Route path="/registration" element={&lt;RegistrationForm onUserAdd={handleAddUser} existingUsers={users} />} />
         &lt;Route path="*" element={&lt;NotFound />} />
       &lt;/Routes>
     &lt;/div>
@@ -100,13 +152,13 @@ export default App;</code></pre>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Components.html">Components</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-validator.ValidationError.html">ValidationError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#API_TOKEN">API_TOKEN</a></li><li><a href="global.html#API_URL">API_URL</a></li><li><a href="global.html#Home">Home</a></li><li><a href="global.html#LocalStorage">LocalStorage</a></li><li><a href="global.html#NotFound">NotFound</a></li><li><a href="global.html#RegistrationForm">RegistrationForm</a></li><li><a href="global.html#Toast">Toast</a></li><li><a href="global.html#addUser">addUser</a></li><li><a href="global.html#axiosConfig">axiosConfig</a></li><li><a href="global.html#calculateAge">calculateAge</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#reportWebVitals">reportWebVitals</a></li><li><a href="global.html#runScenario">runScenario</a></li><li><a href="global.html#validateCity">validateCity</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateIdentity">validateIdentity</a></li><li><a href="global.html#validatePostalCode">validatePostalCode</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Thu Feb 19 2026 19:57:16 GMT+0100 (heure normale d’Europe centrale)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Feb 20 2026 14:46:25 GMT+0100 (heure normale d’Europe centrale)
 </footer>
 
 <script> prettyPrint(); </script>

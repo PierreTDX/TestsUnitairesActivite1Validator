@@ -32,6 +32,12 @@ Mise en place d'une usine logicielle complète avec GitHub Actions.
 *   **Tests E2E** : Implémentation de scénarios nominaux et d'erreurs avec **Cypress** (ex: Ajout utilisateur -> Vérification liste Accueil).
 *   **Pyramide de Tests** : Corrélation entre TU (règles), TI (composants) et E2E (parcours).
 
+### Activité 5 : Simulation d'API & Résilience
+Transition vers une architecture connectée (API REST) et sécurisation des tests.
+*   **Objectif** : Tester le comportement de l'application face aux délais et erreurs réseaux (400, 500) sans dépendre d'un backend réel.
+*   **Technique** : Mocking complet avec Jest (`jest.mock`) et Stubbing réseau avec Cypress (`cy.intercept`).
+*   **Résultat** : Une application résiliente qui informe l'utilisateur en cas de panne, validée par des tests isolés et rapides.
+
 ---
 
 ## Installation et Démarrage
@@ -72,6 +78,7 @@ Mise en place d'une usine logicielle complète avec GitHub Actions.
 *   [Détails Activité 2](https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/Activite2.md)
 *   [Détails Activité 3](https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/Activite3.md)  
 *   [Détails Activité 4](https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/Activite4.md)
+*   [Détails Activité 5](https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/Activite5.md)
 *   [Plan de Test](https://github.com/PierreTDX/Test_et_Test_unitaire/blob/main/my-app/TEST_PLAN.md)
 
 ---
