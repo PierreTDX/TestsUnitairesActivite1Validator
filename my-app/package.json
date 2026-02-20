@@ -24,7 +24,6 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --coverage --collectCoverageFrom=!src/reportWebVitals.js --collectCoverageFrom=!src/index.js --collectCoverageFrom=!src/run-scenarios.js --collectCoverageFrom=!src/**/*.css --watchAll=false",
-    "testjest": "jest --coverage",
     "eject": "react-scripts eject",
     "jsdoc": "jsdoc -R ../README.md -c ./jsdoc.config.json -r -d ./public/docs",
     "scenarios": "node src/run-scenarios.js",
