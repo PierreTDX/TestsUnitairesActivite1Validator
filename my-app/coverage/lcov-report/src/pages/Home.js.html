@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>3/3</span>
+                <span class='fraction'>6/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>7/7</span>
+                <span class='fraction'>17/17</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>3/3</span>
+                <span class='fraction'>6/6</span>
             </div>
         
             
@@ -122,7 +122,18 @@
 <a name='L57'></a><a href='#L57'>57</a>
 <a name='L58'></a><a href='#L58'>58</a>
 <a name='L59'></a><a href='#L59'>59</a>
-<a name='L60'></a><a href='#L60'>60</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -149,7 +160,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">22x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -165,7 +176,18 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -223,15 +245,26 @@ const Home = ({ users = [] }) =&gt; {
                         &lt;p&gt;No users registered yet.&lt;/p&gt;
                     &lt;/div&gt;
                 ) : (
-                    users.map((user, index) =&gt; (
-                        &lt;div key={index} className="user-card"&gt;
-                            &lt;h3&gt;{user.firstName} {user.lastName}&lt;/h3&gt;
-                            &lt;p&gt;&lt;strong&gt;Email:&lt;/strong&gt; {user.email}&lt;/p&gt;
-                            &lt;p&gt;&lt;strong&gt;Birth Date:&lt;/strong&gt; {new Date(user.birthDate).toLocaleDateString()}&lt;/p&gt;
-                            &lt;p&gt;&lt;strong&gt;Location:&lt;/strong&gt; {user.postalCode} {user.city}&lt;/p&gt;
-                            &lt;p className="user-date"&gt;Registered: {new Date(user.timestamp).toLocaleDateString()}&lt;/p&gt;
-                        &lt;/div&gt;
-                    ))
+                    users.map((user, index) =&gt; {
+                        // serialize user data for display, handling both API and local formats
+                        const displayName = user.name || `${user.firstName} ${user.lastName}`;
+                        const displayCity = user.address?.city || user.city;
+                        const displayZip = user.address?.zipcode || user.postalCode;
+&nbsp;
+                        return (
+                            &lt;div key={index} className="user-card"&gt;
+                                &lt;h3&gt;{displayName}&lt;/h3&gt;
+                                &lt;p&gt;&lt;strong&gt;Email:&lt;/strong&gt; {user.email}&lt;/p&gt;
+                                {user.birthDate &amp;&amp; (
+                                    &lt;p&gt;&lt;strong&gt;Birth Date:&lt;/strong&gt; {new Date(user.birthDate).toLocaleDateString()}&lt;/p&gt;
+                                )}
+                                &lt;p&gt;&lt;strong&gt;Location:&lt;/strong&gt; {displayZip} {displayCity}&lt;/p&gt;
+                                {user.timestamp &amp;&amp; (
+                                    &lt;p className="user-date"&gt;Registered: {new Date(user.timestamp).toLocaleDateString()}&lt;/p&gt;
+                                )}
+                            &lt;/div&gt;
+                        );
+                    })
                 )}
             &lt;/div&gt;
 &nbsp;
@@ -247,7 +280,7 @@ export default Home;</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-19T18:56:53.728Z
+                at 2026-02-20T13:15:12.126Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

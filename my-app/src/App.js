@@ -52,7 +52,6 @@ function App() {
     };
     fetchUsers();
   }, []);
-  console.log("Current users in state:", users);
 
   /**
    * Handler to add a new user to the state and API.
@@ -102,6 +101,7 @@ function App() {
         <Toast
           message={loading ? "Synchronizing with Matrix..." : null}
           type="loading"
+          data-testid="app-loading-toast"
         />
       </div>
 

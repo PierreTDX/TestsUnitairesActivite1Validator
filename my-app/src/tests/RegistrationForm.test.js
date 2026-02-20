@@ -4,7 +4,7 @@
  * Verifies UI behavior, validation logic integration, and localStorage interactions.
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import RegistrationForm from '../pages/RegistrationForm';
 
@@ -108,9 +108,11 @@ describe('RegistrationForm Integration Tests', () => {
 
     fireEvent.click(screen.getByTestId('submit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('success-message')).toBeInTheDocument();
-    });
+    // Wait for success message to appear (confirms async work is done)
+    await waitFor(() => expect(screen.getByTestId('success-message')).toBeInTheDocument());
+
+    // Then ensure loading is gone
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
 
     expect(mockOnUserAdd).toHaveBeenCalledTimes(1);
   });
@@ -187,7 +189,11 @@ describe('RegistrationForm Integration Tests', () => {
 
     fireEvent.click(screen.getByTestId('submit-button'));
 
-    expect(mockOnUserAdd).toHaveBeenCalled();
+    // Wait for the mock to be called
+    await waitFor(() => expect(mockOnUserAdd).toHaveBeenCalled());
+
+    // Ensure loading is gone
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
   });
 
   test('displays loading toast during submission', async () => {
@@ -216,6 +222,64 @@ describe('RegistrationForm Integration Tests', () => {
     });
   });
 
+  test('closes success toast when close button is clicked', async () => {
+    const mockOnUserAdd = jest.fn();
+    renderWithRouter(<RegistrationForm onUserAdd={mockOnUserAdd} />);
+
+    const validDate = new Date();
+    validDate.setFullYear(validDate.getFullYear() - 20);
+    const dateString = validDate.toISOString().split('T')[0];
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'jean@example.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    // Wait for success toast to appear (implies submission done)
+    const successToast = await screen.findByTestId('success-message');
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
+
+    const closeButton = within(successToast).getByRole('button');
+    fireEvent.click(closeButton);
+
+    expect(successToast).not.toBeInTheDocument();
+
+    // Ensure loading state is cleared
+  });
+
+  test('closes submit error toast when close button is clicked', async () => {
+    const mockOnUserAdd = jest.fn().mockRejectedValue(new Error('Submission failed'));
+    renderWithRouter(<RegistrationForm onUserAdd={mockOnUserAdd} />);
+
+    const validDate = new Date();
+    validDate.setFullYear(validDate.getFullYear() - 20);
+    const dateString = validDate.toISOString().split('T')[0];
+
+    fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jean' } });
+    fireEvent.change(screen.getByTestId('lastName-input'), { target: { value: 'Dupont' } });
+    fireEvent.change(screen.getByTestId('email-input'), { target: { value: 'jean@example.com' } });
+    fireEvent.change(screen.getByTestId('birthDate-input'), { target: { value: dateString } });
+    fireEvent.change(screen.getByTestId('city-input'), { target: { value: 'Paris' } });
+    fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
+
+    fireEvent.click(screen.getByTestId('submit-button'));
+
+    // Wait for error toast to appear (implies submission done)
+    const errorToast = await screen.findByTestId('submit-error');
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
+
+    const closeButton = within(errorToast).getByRole('button');
+    fireEvent.click(closeButton);
+
+    expect(errorToast).not.toBeInTheDocument();
+
+    // Ensure loading state is cleared
+  });
+
   test('resets form after successful submission', async () => {
     const mockOnUserAdd = jest.fn();
     renderWithRouter(<RegistrationForm onUserAdd={mockOnUserAdd} />);
@@ -233,6 +297,10 @@ describe('RegistrationForm Integration Tests', () => {
 
     fireEvent.click(screen.getByTestId('submit-button'));
 
+    // Wait for loading to disappear
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
+
+    // Check form reset
     await waitFor(() => {
       expect(screen.getByTestId('firstName-input')).toHaveValue('');
       expect(screen.getByTestId('lastName-input')).toHaveValue('');
@@ -263,6 +331,10 @@ describe('RegistrationForm Integration Tests', () => {
     fireEvent.change(screen.getByTestId('postalCode-input'), { target: { value: '75001' } });
 
     fireEvent.click(screen.getByTestId('submit-button'));
+
+    // Wait for error message
+    await waitFor(() => expect(screen.getByTestId('submit-error')).toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
 
     await waitFor(() => {
       expect(screen.getByTestId('submit-error')).toBeInTheDocument();
@@ -366,9 +438,8 @@ describe('RegistrationForm Integration Tests', () => {
     fireEvent.click(screen.getByTestId('submit-button'));
 
     // Check success message
-    await waitFor(() => {
-      expect(screen.getByTestId('success-message')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByTestId('success-message')).toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
 
     // Type something to trigger handleChange
     fireEvent.change(screen.getByTestId('firstName-input'), { target: { value: 'Jeannot' } });
@@ -393,8 +464,7 @@ describe('RegistrationForm Integration Tests', () => {
 
     fireEvent.click(screen.getByTestId('submit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('success-message')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByTestId('success-message')).toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId('loading-toast')).not.toBeInTheDocument());
   });
 });
